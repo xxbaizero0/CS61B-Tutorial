@@ -14,7 +14,7 @@ public class IntListExercises {
             head.first += c;
             head = head.rest;
         }
-        head.first += c;
+        if(head.rest == null) head.first += c;
     }
 
     /**
@@ -68,17 +68,21 @@ public class IntListExercises {
      * @param lst IntList from Lecture
      * @return True if there was an update to the list
      */
-    public static boolean currElemIsPrime = false;
+
     public static boolean squarePrimes(IntList lst) {
         // Base Case: we have reached the end of the list
-        if (lst == null) {
-            return currElemIsPrime;
+        boolean currElemIsPrime = false;
+        while (lst.rest != null){
+            if(!currElemIsPrime) currElemIsPrime = Primes.isPrime(lst.first);
+            if (Primes.isPrime(lst.first)) {
+                lst.first *= lst.first;
+            }
+            lst = lst.rest;
         }
-        if(!currElemIsPrime) currElemIsPrime = Primes.isPrime(lst.first);
-        if (Primes.isPrime(lst.first)) {
+        if(lst.rest == null && Primes.isPrime(lst.first)){
+            if(!currElemIsPrime) currElemIsPrime = Primes.isPrime(lst.first);
             lst.first *= lst.first;
         }
-
-        return squarePrimes(lst.rest);
+        return currElemIsPrime;
     }
 }
