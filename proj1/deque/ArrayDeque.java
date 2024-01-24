@@ -38,7 +38,7 @@ public class ArrayDeque<T> {
         System.arraycopy(item, 0, a, 0, size);
         item = a;
     }
-    public void addFirtst(T i) {
+    public void addFirst(T i) {
         if (size == item.length) {
             resize(size * 2);
         }
