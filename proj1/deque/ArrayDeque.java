@@ -91,4 +91,9 @@ public class ArrayDeque<T> {
         nextLast = back_value(nextLast);
         return cur_value;
     }
+
+    /** Gets the ith item in the list (0 is the front). */
+    public T get(int i) {
+        return item[i];
+    }
 }
