@@ -21,7 +21,7 @@ public class ArrayDeque<T> {
         nextLast = other.nextLast;
     }
 
-    private int next_value(int n) {
+    private int forward_value(int n) {
         n--;
         if(n < 0) n = item.length;
         return n;
@@ -29,31 +29,45 @@ public class ArrayDeque<T> {
 
     private int back_value(int n) {
         n++;
-        if(n > item.length) n = 0;
+        if(n >= item.length) n = 0;
         return n;
     }
 
     private void resize(int x) {
         T[] a = (T[]) new Object[x];
-        System.arraycopy(item, 0, a, 0, size);
+        if ((size < item.length / 4) && (size > 16)) {
+            System.arraycopy(item, nextFirst + 1, a, 0, size);
+            nextFirst = -1;
+            nextLast = size;
+        } else {
+            System.arraycopy(item, 0, a, 0, nextFirst+1);
+            System.arraycopy(item, nextLast, a, a.length - item.length + nextFirst + 1, item.length - nextFirst -1);
+            nextFirst = a.length - item.length + nextFirst;
+        }
         item = a;
     }
     public void addFirst(T i) {
         if (size == item.length) {
             resize(size * 2);
+            while (item[nextFirst] != null) {
+                nextFirst = forward_value(nextFirst);
+            }
         }
         item[nextFirst] = i;
         size++;
-        nextFirst = next_value(nextFirst);
+        nextFirst = forward_value(nextFirst);
     }
 
     public void addLast(T i) {
         if (size == item.length) {
             resize(size * 2);
+            while (item[nextLast] != null) {
+                nextLast = back_value(nextLast);
+            }
         }
         item[nextLast] = i;
         size++;
-        nextLast = next_value(nextLast);
+        nextLast = back_value(nextLast);
     }
     public boolean isEmpty() {
         return size <= 0;
@@ -68,32 +82,37 @@ public class ArrayDeque<T> {
         }
     }
 
-    private void save_space() {
-        int rate = size/item.length;
-        if (rate < 0.25) {
-            T[] a = (T[]) new Object[item.length/2];
-            System.arraycopy(item, 0, a, 0, a.length);
-            item = a;
-        }
-    }
-
     public T removeFirst() {
-        save_space();
+        if (size <= 0) {
+            return null;
+        }
+        if ((size < item.length / 4) && (size > 16)) {
+            resize(item.length / 4);
+        }
         T cur_value = item[back_value(nextFirst)];
         item[back_value(nextFirst)] = null;
         nextFirst = back_value(nextFirst);
+        size--;
         return cur_value;
     }
     public T removeLast() {
-        save_space();
-        T cur_value = item[back_value(nextLast)];
-        item[back_value(nextLast)] = null;
-        nextLast = back_value(nextLast);
+        if (size <= 0) {
+            return null;
+        }
+        if ((size < item.length / 4) && (size > 16)) {
+            resize(item.length / 4);
+        }
+
+        T cur_value = item[forward_value(nextLast)];
+        item[forward_value(nextLast)] = null;
+        nextLast = forward_value(nextLast);
+        size--;
         return cur_value;
     }
 
     /** Gets the ith item in the list (0 is the front). */
     public T get(int i) {
+        if (i >= size()) return null;
         return item[i];
     }
 }
