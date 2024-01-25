@@ -36,7 +36,7 @@ public class TimeSLList {
             for (int j = 0; j < Ns.get(i) ;j++){
                 test.addLast(j);
             }
-            int M = 1000;
+            int M = 10000;
             Stopwatch sw = new Stopwatch();
             for (int z = 0; z < M; z++) {
                 test.getLast();
