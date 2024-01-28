@@ -1,7 +1,7 @@
 package deque;
 import java.util.Iterator;
 
-public class LinkedListDeque<T> {
+public class LinkedListDeque<T> implements Deque<T>{
 
     public class Node {
         private T item;
@@ -29,24 +29,33 @@ public class LinkedListDeque<T> {
         sentinel.prev = sentinel.next;
         size = 1;
     }
+
+    /** Adds an item of type T to the front of the deque.
+     * You can assume that item is never null. */
+    @Override
     public void addFirst(T item) {
         sentinel.next = new Node(item, sentinel, sentinel.next);
         size += 1;
     }
+
+    /** Adds an item of type T to the back of the deque.
+     * You can assume that item is never null. */
+    @Override
     public void addLast(T item) {
         sentinel.prev = new Node(item, sentinel.prev, sentinel);
         sentinel.prev.prev.next = sentinel.prev;
         size += 1;
     }
 
-    public boolean isEmpty() {
-        return size() <= 0;
-    }
-
+    /** Returns the number of items in the deque. */
+    @Override
     public int size() {
         return size;
     }
 
+    /** Prints the items in the deque from first to last, separated by a space.
+     * Once all the items have been printed, print out a new line. */
+    @Override
     public void printDeque() {
         int i = size();
         Node p = sentinel;
@@ -58,6 +67,9 @@ public class LinkedListDeque<T> {
         }
     }
 
+    /** Removes and returns the item at the front of the deque.
+     * If no such item exists, returns null. */
+    @Override
     public T removeFirst() {
         if (size <= 0) {
             return null;
@@ -72,6 +84,9 @@ public class LinkedListDeque<T> {
         return item;
     }
 
+    /** Removes and returns the item at the back of the deque.
+     * If no such item exists, returns null. */
+    @Override
     public T removeLast() {
         if (size <= 0) {
             return null;
@@ -86,6 +101,9 @@ public class LinkedListDeque<T> {
         return item;
     }
 
+    /** Gets the item at the given index, where 0 is the front, 1 is the next item, and so forth.
+     * If no such item exists, returns null. Must not alter the deque! */
+    @Override
     public T get(int index) {
         if (index > size()) {
             return null;
@@ -96,5 +114,20 @@ public class LinkedListDeque<T> {
             index--;
         }
         return p.item;
+    }
+
+    private T getRecursivehelper(int index, Node s) {
+        /*
+        get函数的递归方式
+        */
+        if (index == 0) {
+            return s.item;
+        } else {
+            return getRecursivehelper(index - 1, s.next);
+        }
+    }
+    /** Same as get, but uses recursion. */
+    public T getRecursive(int index) {
+        return getRecursivehelper(index, sentinel.next);
     }
 }

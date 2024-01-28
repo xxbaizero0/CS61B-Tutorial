@@ -1,6 +1,6 @@
 package deque;
 
-public class ArrayDeque<T> {
+public class ArrayDeque<T> implements Deque<T>{
     private T[] item;
     private int size;
     private int nextFirst;
@@ -37,6 +37,8 @@ public class ArrayDeque<T> {
         return n;
     }
 
+    /** before performing a remove operation that will bring the number of elements in the array under 25% the length of the array,
+     * resize the size of the array down. */
     private void resize(int x) {
         T[] a = (T[]) new Object[x];
         if ((size < item.length / 4) && (size > 16)) {
@@ -50,6 +52,10 @@ public class ArrayDeque<T> {
         }
         item = a;
     }
+
+    /** Adds an item of type T to the front of the deque.
+     * You can assume that item is never null. */
+    @Override
     public void addFirst(T i) {
         if (size == item.length) {
             resize(size * 2);
@@ -62,6 +68,9 @@ public class ArrayDeque<T> {
         nextFirst = ForwardValue(nextFirst);
     }
 
+    /** Adds an item of type T to the back of the deque.
+     * You can assume that item is never null. */
+    @Override
     public void addLast(T i) {
         if (size == item.length) {
             resize(size * 2);
@@ -73,21 +82,25 @@ public class ArrayDeque<T> {
         size++;
         nextLast = BackValue(nextLast);
     }
-    public boolean isEmpty() {
-        return size <= 0;
 
-    }
+    /** Returns the number of items in the deque. */
+    @Override
     public int size() {
         return size;
     }
+
+    /** Prints the items in the deque from first to last, separated by a space.
+     * Once all the items have been printed, print out a new line. */
+    @Override
     public void printDeque() {
-        for (T t : item) {
-            if (t != null) {
-                System.out.println(t);
-            }
+        for (int i = 0; i < size; i++) {
+            System.out.println(item[(nextFirst + i + 1) % item.length]);
         }
     }
 
+    /** Removes and returns the item at the front of the deque.
+     * If no such item exists, returns null. */
+    @Override
     public T removeFirst() {
         if (size <= 0) {
             return null;
@@ -102,6 +115,9 @@ public class ArrayDeque<T> {
         return curValue;
     }
 
+    /** Removes and returns the item at the back of the deque.
+     * If no such item exists, returns null. */
+    @Override
     public T removeLast() {
         if (size <= 0) {
             return null;
@@ -118,6 +134,7 @@ public class ArrayDeque<T> {
     }
 
     /** Gets the ith item in the list (0 is the front). */
+    @Override
     public T get(int i) {
         if (i >= size()) {
             return null;
