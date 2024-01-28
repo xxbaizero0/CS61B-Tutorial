@@ -130,5 +130,16 @@ public class ArrayDequeTest {
         }
 
     }
+
+//    @Test
+//    public void get_null(){
+//        ArrayDeque<Integer> Ad1 = new ArrayDeque<>();
+//        for (int i = 0; i < 10; i++) {
+//            Ad1.addFirst(i);
+//        }
+//        assertEquals(0, (int)Ad1.get(0));
+//        assertEquals(2, (int)Ad1.get(2));
+//        assertEquals(9, (int)Ad1.get(9));
+//    }
 }
 

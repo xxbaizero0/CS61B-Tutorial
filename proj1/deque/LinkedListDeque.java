@@ -1,12 +1,11 @@
 package deque;
-
 import java.util.Iterator;
 
 public class LinkedListDeque<T> {
 
     public class Node {
-        public T item;
-        public Node next;
+        private T item;
+        private Node next;
         public Node prev;
         Node(T i, Node p, Node n) {
             item = i;
@@ -67,7 +66,9 @@ public class LinkedListDeque<T> {
         T item = sentinel.next.item;
         sentinel.next.next.prev = sentinel.next.prev;
         sentinel.next = sentinel.next.next;
-        if (size == 0) return item;
+        if (size == 0) {
+            return item;
+        }
         return item;
     }
 
@@ -79,12 +80,16 @@ public class LinkedListDeque<T> {
         T item = sentinel.prev.item;
         sentinel.prev.prev.next = sentinel;
         sentinel.prev = sentinel.prev.prev;
-        if (size == 0) return item;
+        if (size == 0) {
+            return item;
+        }
         return item;
     }
 
     public T get(int index) {
-        if (index > size()) return null;
+        if (index > size()) {
+            return null;
+        }
         Node p = sentinel;
         while (index > 0) {
             p = p.next;
@@ -92,5 +97,4 @@ public class LinkedListDeque<T> {
         }
         return p.item;
     }
-
 }
