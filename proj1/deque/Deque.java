@@ -1,5 +1,4 @@
 package deque;
-import java.util.Iterator;
 
 public interface Deque<T> {
 
@@ -12,10 +11,6 @@ public interface Deque<T> {
     }
 
     int size();
-
-    Iterator<T> iterator();
-
-    boolean equals(Object o);
 
     void printDeque();
 

@@ -1,9 +1,6 @@
 package deque;
-import java.util.Iterator;
-import java.util.Objects;
 
-
-public class ArrayDeque<T> implements Deque<T>,Iterable<T> {
+public class ArrayDeque<T> implements Deque<T> {
     private T[] item;
     private int size;
     private int nextFirst;
@@ -144,64 +141,4 @@ public class ArrayDeque<T> implements Deque<T>,Iterable<T> {
         }
         return item[(nextFirst + i + 1) % item.length];
     }
-
-    @Override
-    public Iterator<T> iterator() {
-        return new ArrayDeuqeIterator();
-    }
-
-
-    private class ArrayDeuqeIterator implements Iterator<T> {
-        private int wizPos;
-        private int insideSize;
-
-        ArrayDeuqeIterator() {
-            wizPos = (nextFirst + 1) % item.length;
-            insideSize = size;
-        }
-        @Override
-        public boolean hasNext() {
-            return insideSize > 0;
-        }
-
-        @Override
-        public T next() {
-            T returnT = item[wizPos];
-            wizPos = (wizPos + 1) % item.length;
-            insideSize -= 1;
-            return returnT;
-        }
-
-    }
-
-
-
-    @Override
-    public boolean equals(Object o) {
-        //检查地址是否相同
-        if (o == this) {
-            return true; // 同一个对象
-        }
-        // 检查o的类型是否为ArrayDeque
-        if (o instanceof Deque<?> oas)  { // 是否有相同的泛型类型
-            // 检查两个对象的大小是否相等
-            if (oas.size() != this.size()) {
-                return false;
-            }
-            // 按顺序检查所有值相等
-            Iterator<T> thisIterator = this.iterator();
-            Iterator<?> otherIterator = oas.iterator();
-            while (thisIterator.hasNext() && otherIterator.hasNext()) {
-                T thisItem = thisIterator.next();
-                Object otherItem = otherIterator.next();
-                if (!(Objects.equals(thisItem, otherItem))) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            return false; // 不是相同类型的对象
-        }
-    }
-
 }
