@@ -13,7 +13,7 @@ public class ArrayDeque<T> implements Deque<T> {
         nextLast = 2;
     }
 
-    public ArrayDeque(ArrayDeque other) {
+    public ArrayDeque(ArrayDeque<T> other) {
         item = (T []) new Object[8];
         System.arraycopy(other.item, 0, item, 0, size);
         size = other.size;
