@@ -3,42 +3,37 @@ package deque;
 import deque.ArrayDeque;
 import java.util.Comparator;
 
-public class MaxArrayDeque<T> {
-    private ArrayDeque<T> arrayDeque;
+public class MaxArrayDeque<T> extends ArrayDeque<T> {
+
     private Comparator<T> comparator;
 
     public MaxArrayDeque(Comparator<T> c) {
-        arrayDeque = new ArrayDeque<>();
+         super();
         this.comparator = c;
     }
 
+    /* returns the maximum element in the deque
+as governed by the previously given Comparator.
+If the MaxArrayDeque is empty, simply return null. */
     public T max() {
-        if (arrayDeque.isEmpty()) {
-            return null;
-        }
-
-        T maxElement = arrayDeque.get(0);
-        for (int i = 0; i < arrayDeque.size(); i++) {
-            if (comparator.compare(arrayDeque.get(i), maxElement) > 0) {
-                maxElement = arrayDeque.get(i);
+        T maxElement = this.get(0);
+        for (T x : this) {
+            if (comparator.compare(x, maxElement) > 0) {
+                maxElement = x;
             }
         }
-
         return maxElement;
     }
-
-    public T max(Comparator<T> c) {
-        if (arrayDeque.isEmpty()) {
-            return null;
-        }
-
-        T maxElement = arrayDeque.get(0);
-        for (int i = 0; i < arrayDeque.size(); i++) {
-            if (comparator.compare(arrayDeque.get(i), maxElement) > 0) {
-                maxElement = arrayDeque.get(i);
+    /* returns the maximum element in the deque
+    as governed by the parameter Comparator c.
+    If the MaxArrayDeque is empty, simply return null.*/
+    public T max(Comparator<T> ca) {
+        T maxElement = this.get(0);
+        for (T x : this) {
+            if (ca.compare(x, maxElement) > 0) {
+                maxElement = x;
             }
         }
-
         return maxElement;
     }
 }
