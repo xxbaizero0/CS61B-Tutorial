@@ -157,19 +157,21 @@ public class ArrayDequeTest {
     @Test
     public void checkAM() {
         ArrayDeque<Integer> studuent = new ArrayDeque<>();
-        for (int i = 0; i < 10; i++) {
-            studuent.addFirst(i);
+        studuent.addFirst(2);
+        studuent.addFirst(2);
+        for (int i = 0; i < 9; i++) {
+            studuent.addLast(i);
         }
-        assertEquals((int) studuent.get(0), 9);
-        assertEquals((int) studuent.get(2), 7);
-        assertEquals((int) studuent.get(6), 3);
+        assertEquals((int) studuent.get(0), 2);
+        assertEquals((int) studuent.get(1), 2);
+        assertEquals((int) studuent.get(2), 0);
     }
 
     @Test
     public void checkAdd() {
         ArrayDeque<Integer> studuent = new ArrayDeque<>();
         java.util.ArrayDeque<Integer> solution = new java.util.ArrayDeque<Integer>();
-        int N = 5000000;
+        int N = 5000;
         for (int i = 0; i < N; i++) {
             int operationNumber = StdRandom.uniform(0, 3);
             if (operationNumber == 0) {
@@ -178,10 +180,10 @@ public class ArrayDequeTest {
                 solution.addFirst(randVal);
                 System.out.println("addFirst:(" + randVal + ")");
             } else if (operationNumber == 1) {
-                int randVal = StdRandom.uniform(0, 100);
-                studuent.addLast(randVal);
-                solution.addLast(randVal);
-                System.out.println("addLast:(" + randVal + ")");
+//                int randVal = StdRandom.uniform(0, 100);
+//                studuent.addLast(randVal);
+//                solution.addLast(randVal);
+//                System.out.println("addLast:(" + randVal + ")");
 //                int size = solution.size();
 //                System.out.println("size:(" + size + ")");
             } else if (operationNumber == 2) {

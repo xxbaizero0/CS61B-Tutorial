@@ -42,7 +42,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
     private void resize(int x) {
         T[] a = (T[]) new Object[x];
-        if ((size < item.length / 4) && (size > 16)) {
+        if ((size < item.length / 4) && (size >= 16)) {
             if ((item.length - nextFirst - 1) < size) {
                 int length = size - (item.length - nextFirst - 1);
                 System.arraycopy(item, 0, a, 0, length);
@@ -114,7 +114,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (size <= 0) {
             return null;
         }
-        if ((size < item.length / 4) && (size > 16)) {
+        if ((size < item.length / 4) && (size >= 16)) {
             resize(item.length / 4);
         }
         T curValue = item[backValue(nextFirst)];
@@ -131,8 +131,8 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (size <= 0) {
             return null;
         }
-        if ((size < item.length * 0.25) && (size > 16)) {
-            resize(item.length / 4);
+        if ((size < item.length / 4) && (size >= 16)) {
+            resize(item.length / 2);
         }
 
         T curValue = item[forwardValue(nextLast)];
