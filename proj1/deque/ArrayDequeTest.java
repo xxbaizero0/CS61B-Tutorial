@@ -1,5 +1,7 @@
 package deque;
 import edu.princeton.cs.algs4.StdRandom;
+
+import java.io.EOFException;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -142,14 +144,43 @@ public class ArrayDequeTest {
         assertEquals(0, (int)Ad1.get(9));
     }
 
+//    @Test
+//    public void equelTest() {
+//        LinkedListDeque<Integer> lld1 = LinkedListDeque.of(1, 3, 5, 2);
+//        LinkedListDeque<Integer> lld2 = LinkedListDeque.of(1, 3, 5, 2);
+//        LinkedListDeque<Integer> lld3 = LinkedListDeque.of(1, 3, 5, 1);
+//        assertTrue(lld1.equals(lld2));
+//        assertTrue(lld1.equals(lld1));
+//        assertFalse(lld1.equals(lld3));
+//    }
     @Test
-    public void equelTest() {
-        LinkedListDeque<Integer> lld1 = LinkedListDeque.of(1, 3, 5, 2);
-        LinkedListDeque<Integer> lld2 = LinkedListDeque.of(1, 3, 5, 2);
-        LinkedListDeque<Integer> lld3 = LinkedListDeque.of(1, 3, 5, 1);
-        assertTrue(lld1.equals(lld2));
-        assertTrue(lld1.equals(lld1));
-        assertFalse(lld1.equals(lld3));
+    public void checkAdd() {
+        ArrayDeque<Integer> studuent = new ArrayDeque<>();
+        java.util.ArrayDeque<Integer> solution = new java.util.ArrayDeque<Integer>();
+        int N = 50000;
+        for (int i = 0; i < N; i++) {
+            int operationNumber = StdRandom.uniform(0, 3);
+            if (operationNumber == 0) {
+                int randVal = StdRandom.uniform(0, 100);
+                studuent.addFirst(randVal);
+                solution.addFirst(randVal);
+                System.out.println("addFirst:(" + randVal + ")");
+            } else if (operationNumber == 1) {
+                int size = solution.size();
+                System.out.println("size:(" + size + ")");
+            } else if (operationNumber == 2) {
+                if (solution.size() == 0) {
+                    continue;
+                }
+                int last = solution.getLast();
+                if (solution.size() > 0) {
+                    assertEquals("No equal", solution.removeFirst(), studuent.removeFirst());
+                    System.out.println("removelast:" + last + ")");
+                } else {
+                    System.out.println("No enough size");
+                }
+            }
+        }
     }
 }
 

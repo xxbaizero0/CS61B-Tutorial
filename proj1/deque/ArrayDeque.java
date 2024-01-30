@@ -1,7 +1,6 @@
 package deque;
 
 import java.util.Iterator;
-import java.util.List;
 
 public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private T[] item;
@@ -16,15 +15,15 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         nextLast = 2;
     }
 
-    public ArrayDeque(ArrayDeque<T> other) {
-        item = (T []) new Object[8];
-        System.arraycopy(other.item, 0, item, 0, size);
-        size = other.size;
-        nextFirst = other.nextFirst;
-        nextLast = other.nextLast;
-    }
+//    public ArrayDeque(ArrayDeque<T> other) {
+//        item = (T []) new Object[8];
+//        System.arraycopy(other.item, 0, item, 0, size);
+//        size = other.size;
+//        nextFirst = other.nextFirst;
+//        nextLast = other.nextLast;
+//    }
 
-    private int ForwardValue(int n) {
+    private int forwardValue(int n) {
         n--;
         if (n < 0) {
             n = item.length - 1;
@@ -32,7 +31,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return n;
     }
 
-    private int BackValue(int n) {
+    private int backValue(int n) {
         n++;
         if (n >= item.length) {
             n = 0;
@@ -40,17 +39,25 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return n;
     }
 
-    /** before performing a remove operation that will bring the number of elements in the array under 25% the length of the array,
-     * resize the size of the array down. */
     private void resize(int x) {
         T[] a = (T[]) new Object[x];
         if ((size < item.length / 4) && (size > 16)) {
-            System.arraycopy(item, nextFirst+1, a, 0, size);
-            nextFirst = -1;
-            nextLast = size;
+            if ((item.length - nextFirst - 1) < size ){
+                int length = size - (item.length - nextFirst - 1);
+                System.arraycopy(item, 0, a, 0, length);
+                System.arraycopy(item, nextFirst + 1, a, length + 1, item.length - nextFirst - 1);
+                nextFirst = length;
+                nextLast = length;
+            } else {
+                System.arraycopy(item, nextFirst + 1, a, 0, size);
+                nextFirst = - 1;
+                nextLast = size;
+            }
         } else {
-            System.arraycopy(item, 0, a, 0, nextFirst+1);
-            System.arraycopy(item, nextLast, a, a.length - item.length + nextFirst + 1, item.length - nextFirst -1);
+            System.arraycopy(item, 0, a, 0, nextFirst + 1);
+            int destPost = a.length - item.length + nextFirst + 1;
+            int length = item.length - nextFirst - 1;
+            System.arraycopy(item, nextLast, a, destPost, length);
             nextFirst = a.length - item.length + nextFirst;
         }
         item = a;
@@ -63,12 +70,12 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (size == item.length) {
             resize(size * 2);
             while (item[nextFirst] != null) {
-                nextFirst = ForwardValue(nextFirst);
+                nextFirst = forwardValue(nextFirst);
             }
         }
         item[nextFirst] = i;
         size++;
-        nextFirst = ForwardValue(nextFirst);
+        nextFirst = forwardValue(nextFirst);
     }
 
     /** Adds an item of type T to the back of the deque.
@@ -78,12 +85,12 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if (size == item.length) {
             resize(size * 2);
             while (item[nextLast] != null) {
-                nextLast = BackValue(nextLast);
+                nextLast = backValue(nextLast);
             }
         }
         item[nextLast] = i;
         size++;
-        nextLast = BackValue(nextLast);
+        nextLast = backValue(nextLast);
     }
 
     /** Returns the number of items in the deque. */
@@ -92,8 +99,6 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         return size;
     }
 
-    /** Prints the items in the deque from first to last, separated by a space.
-     * Once all the items have been printed, print out a new line. */
     @Override
     public void printDeque() {
         for (int i = 0; i < size; i++) {
@@ -111,9 +116,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         if ((size < item.length / 4) && (size > 16)) {
             resize(item.length / 4);
         }
-        T curValue = item[BackValue(nextFirst)];
-        item[BackValue(nextFirst)] = null;
-        nextFirst = BackValue(nextFirst);
+        T curValue = item[backValue(nextFirst)];
+        item[backValue(nextFirst)] = null;
+        nextFirst = backValue(nextFirst);
         size--;
         return curValue;
     }
@@ -129,9 +134,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             resize(item.length / 4);
         }
 
-        T curValue = item[ForwardValue(nextLast)];
-        item[ForwardValue(nextLast)] = null;
-        nextLast = ForwardValue(nextLast);
+        T curValue = item[forwardValue(nextLast)];
+        item[forwardValue(nextLast)] = null;
+        nextLast = forwardValue(nextLast);
         size--;
         return curValue;
     }
@@ -171,7 +176,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
         @Override
         public T next() {
             T nextItem = item[wizPos];
-            wizPos ++;
+            wizPos++;
             return nextItem;
         }
     }
@@ -206,11 +211,11 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 //        return "{" + String.join(",", listOfItems) + "}";
 //    }
 
-    public static <G> ArrayDeque<G> of(G... stuff) {
-        ArrayDeque<G> list = new ArrayDeque<>();
-        for (G i : stuff) {
-            list.addLast(i);
-        }
-        return list;
-    }
+//    public static <G> ArrayDeque<G> of(G... stuff) {
+//        ArrayDeque<G> list = new ArrayDeque<>();
+//        for (G i : stuff) {
+//            list.addLast(i);
+//        }
+//        return list;
+//    }
 }

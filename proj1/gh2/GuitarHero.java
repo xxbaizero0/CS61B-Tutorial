@@ -6,7 +6,7 @@ import edu.princeton.cs.introcs.StdAudio;
 public class GuitarHero {
     public static void main(String[] args) {
         final String keyboard = "q2we4r5ty7u8i9op-[=zxdcfvgbnjmk,.;/' ";
-        final int FREQ = 440;
+        final int freq0 = 440;
         ArrayDeque<GuitarString> guitar = new ArrayDeque<>();
         int index = -1;
         while (true) {
@@ -14,13 +14,13 @@ public class GuitarHero {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = StdDraw.nextKeyTyped();
                 int i = keyboard.indexOf(key);
-                double freq = FREQ * Math.pow(2, (double) (i - 24) /12);
+                double freq = freq0 * Math.pow(2, (double) (i - 24) / 12);
                 guitar.addLast(new GuitarString(freq));
                 if (guitar.size() > index) {
                     index++;
                 }
                 guitar.get(index).pluck();
-                }
+            }
             double sample = 0.0;
 
             for (int j = 0; j < guitar.size(); j++) {

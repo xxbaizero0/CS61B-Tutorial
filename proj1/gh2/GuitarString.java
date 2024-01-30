@@ -32,24 +32,24 @@ public class GuitarString {
         //       are different from each other. It means you should repeatedly call
         //       Math.random() - 0.5 to generate new random numbers for each array index.
         double temp;
-        Deque<Double> NewBuffer = new ArrayDeque<Double>();
+        Deque<Double> newBuffer = new ArrayDeque<Double>();
         for (int i = 0; i < buffer.size(); i++) {
             double r = Math.random() - 0.5;
             temp = buffer.get(i);
-            NewBuffer.addLast(temp - r);
+            newBuffer.addLast(temp - r);
         }
-        buffer = NewBuffer;
+        buffer = newBuffer;
     }
 
     /* Advance the simulation one time step by performing one iteration of
      * the Karplus-Strong algorithm.
      */
     public void tic() {
-        double NewDouble;
+        double newDouble;
         double temp = buffer.get(0);
         buffer.removeFirst();
-        NewDouble = DECAY * 0.5 * (temp + buffer.get(0));
-        buffer.addLast(NewDouble);
+        newDouble = DECAY * 0.5 * (temp + buffer.get(0));
+        buffer.addLast(newDouble);
 
     }
 

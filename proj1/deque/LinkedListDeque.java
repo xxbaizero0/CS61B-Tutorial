@@ -1,15 +1,12 @@
 package deque;
 import java.util.Iterator;
 
-import java.util.List;
-import java.util.Objects;
-
 public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     public class Node {
         private T item;
         private Node next;
-        public Node prev;
+        private Node prev;
         Node(T i, Node p, Node n) {
             item = i;
             prev = p;
@@ -20,24 +17,25 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
     private int size;
     private final Node sentinel;
     public LinkedListDeque() {
-        sentinel = new Node(null ,null, null);
+        sentinel = new Node(null, null, null);
         sentinel.prev = sentinel;
         sentinel.next = sentinel;
         size = 0;
     }
 
-    public LinkedListDeque(T i) {
-        sentinel = new Node(i, null, null);
-        sentinel.next = new Node(i, sentinel, sentinel);
-        sentinel.prev = sentinel.next;
-        size = 1;
-    }
+//    public LinkedListDeque(T i) {
+//        sentinel = new Node(i, null, null);
+//        sentinel.next = new Node(i, sentinel, sentinel);
+//        sentinel.prev = sentinel.next;
+//        size = 1;
+//    }
 
     /** Adds an item of type T to the front of the deque.
      * You can assume that item is never null. */
     @Override
     public void addFirst(T item) {
         sentinel.next = new Node(item, sentinel, sentinel.next);
+        sentinel.next.next.prev = sentinel.next;
         size += 1;
     }
 
@@ -140,7 +138,7 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     private class LinkedListDequeIterator implements Iterator<T> {
 
-        Node p;
+        private Node p;
 
         public LinkedListDequeIterator() {
             p = sentinel.next;
@@ -191,11 +189,11 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 //        return "{" + String.join(",", listOfItems) + "}";
 //    }
 
-    public static <G> LinkedListDeque<G> of(G... stuff) {
-        LinkedListDeque<G> list = new LinkedListDeque<>();
-        for (G i : stuff) {
-            list.addLast(i);
-        }
-        return list;
-    }
+//    public static <G> LinkedListDeque<G> of(G... stuff) {
+//        LinkedListDeque<G> list = new LinkedListDeque<>();
+//        for (G i : stuff) {
+//            list.addLast(i);
+//        }
+//        return list;
+//    }
 }
