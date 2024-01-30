@@ -151,8 +151,8 @@ public class LinkedListDequeTest {
             int operationNumber = StdRandom.uniform(0, 3);
             if (operationNumber == 0) {
                 int randVal = StdRandom.uniform(0, 100);
-                studuent.addFirst(randVal);
-                solution.addFirst(randVal);
+                studuent.addLast(randVal);
+                solution.addLast(randVal);
                 System.out.println("addFirst:(" + randVal + ")");
             } else if (operationNumber == 1) {
                 int size = solution.size();
@@ -163,13 +163,22 @@ public class LinkedListDequeTest {
                 }
                 int last = solution.getLast();
                 if (solution.size() > 0) {
-                    assertEquals("No equal", solution.removeFirst(), studuent.removeFirst());
+                    assertEquals("No equal", studuent.removeFirst(), studuent.removeFirst());
                     System.out.println("removelast:" + last + ")");
                 } else {
                     System.out.println("No enough size");
                 }
             }
         }
+    }
+
+    @Test
+    public void checkGet() {
+        LinkedListDeque<Integer> studuent = new LinkedListDeque<>();
+        int operationNumber = StdRandom.uniform(0, 3);
+        studuent.addLast(operationNumber);
+        int getNum = studuent.get(0);
+        assertEquals(getNum, operationNumber);
     }
 }
 

@@ -42,16 +42,16 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private void resize(int x) {
         T[] a = (T[]) new Object[x];
         if ((size < item.length / 4) && (size > 16)) {
-            if ((item.length - nextFirst - 1) < size ){
+            if ((item.length - nextFirst - 1) < size ) {
                 int length = size - (item.length - nextFirst - 1);
                 System.arraycopy(item, 0, a, 0, length);
                 System.arraycopy(item, nextFirst + 1, a, length + 1, item.length - nextFirst - 1);
                 nextFirst = length;
                 nextLast = length;
             } else {
-                System.arraycopy(item, nextFirst + 1, a, 0, size);
-                nextFirst = - 1;
-                nextLast = size;
+                System.arraycopy(item, nextFirst + 1, a, 1, size);
+                nextFirst = 0;
+                nextLast = 0;
             }
         } else {
             System.arraycopy(item, 0, a, 0, nextFirst + 1);
@@ -159,7 +159,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
 
         private int wizPos;
 
-        public ArrayDequeIterator() {
+        ArrayDequeIterator() {
             wizPos = 0;
         }
         /**
@@ -195,7 +195,7 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             return false;
         }
         for (int i = 0; i < size(); i++) {
-            if (this.get(i) != o.get(i)) {
+            if (!this.get(i).equals(o.get(i))) {
                 return false;
             }
         }

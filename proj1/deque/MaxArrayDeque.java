@@ -1,6 +1,4 @@
 package deque;
-
-import deque.ArrayDeque;
 import java.util.Comparator;
 
 public class MaxArrayDeque<T> extends ArrayDeque<T> {
