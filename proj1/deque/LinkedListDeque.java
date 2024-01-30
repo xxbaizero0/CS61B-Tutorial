@@ -1,5 +1,4 @@
 package deque;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 import java.util.List;
@@ -183,14 +182,14 @@ public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
         return true;
     }
 
-    @Override
-    public String toString() {
-        List<String> listOfItems = new ArrayList<>();
-        for (T x : this) {
-            listOfItems.add(x.toString());
-        }
-        return "{" + String.join(",", listOfItems) + "}";
-    }
+//    @Override
+//    public String toString() {
+//        List<String> listOfItems = new ArrayList<>();
+//        for (T x : this) {
+//            listOfItems.add(x.toString());
+//        }
+//        return "{" + String.join(",", listOfItems) + "}";
+//    }
 
     public static <G> LinkedListDeque<G> of(G... stuff) {
         LinkedListDeque<G> list = new LinkedListDeque<>();
