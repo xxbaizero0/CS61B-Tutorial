@@ -114,8 +114,6 @@ public class LinkedListDequeTest {
     @Test
     /* Add large number of elements to deque; check if order is correct. */
     public void bigLLDequeTest() {
-
-
         LinkedListDeque<Integer> lld1 = new LinkedListDeque<Integer>();
         for (int i = 0; i < 1000000; i++) {
             lld1.addLast(i);
@@ -128,8 +126,16 @@ public class LinkedListDequeTest {
         for (double i = 999999; i > 500000; i--) {
             assertEquals("Should have the same value", i, (double) lld1.removeLast(), 0.0);
         }
+    }
 
-
+    @Test
+    public void equelTest() {
+        LinkedListDeque<Integer> lld1 = LinkedListDeque.of(1, 3, 5, 2);
+        LinkedListDeque<Integer> lld2 = LinkedListDeque.of(1, 3, 5, 2);
+        LinkedListDeque<Integer> lld3 = LinkedListDeque.of(1, 3, 5, 1);
+        assertTrue(lld1.equals(lld2));
+        assertTrue(lld1.equals(lld1));
+        assertFalse(lld1.equals(lld3));
     }
 }
 

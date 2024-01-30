@@ -1,6 +1,10 @@
 package deque;
 
-public class ArrayDeque<T> implements Deque<T> {
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
     private T[] item;
     private int size;
     private int nextFirst;
@@ -140,5 +144,74 @@ public class ArrayDeque<T> implements Deque<T> {
             return null;
         }
         return item[(nextFirst + i + 1) % item.length];
+    }
+
+
+    public Iterator<T> iterator() {
+        return new ArrayDequeIterator();
+    }
+
+    private class ArrayDequeIterator implements Iterator<T> {
+
+        private int wizPos;
+
+        public ArrayDequeIterator() {
+            wizPos = 0;
+        }
+        /**
+         * @return false if reach the end of deque.
+         */
+        @Override
+        public boolean hasNext() {
+            return wizPos < size();
+        }
+
+        /**
+         * @return
+         */
+        @Override
+        public T next() {
+            T nextItem = item[wizPos];
+            wizPos ++;
+            return nextItem;
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        ArrayDeque<T> o = (ArrayDeque<T>) obj;
+        if (size() != o.size()) {
+            return false;
+        }
+        for (int i = 0; i < size(); i++) {
+            if (this.get(i) != o.get(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        List<String> listOfItems = new ArrayList<>();
+        for (T x : this) {
+            listOfItems.add(x.toString());
+        }
+        return "{" + String.join(",", listOfItems) + "}";
+    }
+
+    public static <G> ArrayDeque<G> of(G... stuff) {
+        ArrayDeque<G> list = new ArrayDeque<>();
+        for (G i : stuff) {
+            list.addLast(i);
+        }
+        return list;
     }
 }

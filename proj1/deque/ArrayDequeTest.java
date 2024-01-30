@@ -141,5 +141,15 @@ public class ArrayDequeTest {
         assertEquals(8, (int)Ad1.get(1));
         assertEquals(0, (int)Ad1.get(9));
     }
+
+    @Test
+    public void equelTest() {
+        LinkedListDeque<Integer> lld1 = LinkedListDeque.of(1, 3, 5, 2);
+        LinkedListDeque<Integer> lld2 = LinkedListDeque.of(1, 3, 5, 2);
+        LinkedListDeque<Integer> lld3 = LinkedListDeque.of(1, 3, 5, 1);
+        assertTrue(lld1.equals(lld2));
+        assertTrue(lld1.equals(lld1));
+        assertFalse(lld1.equals(lld3));
+    }
 }
 

@@ -1,9 +1,11 @@
 package deque;
+import java.util.ArrayList;
 import java.util.Iterator;
 
+import java.util.List;
 import java.util.Objects;
 
-public class LinkedListDeque<T> implements Deque<T> {
+public class LinkedListDeque<T> implements Deque<T>, Iterable<T> {
 
     public class Node {
         private T item;
@@ -131,5 +133,70 @@ public class LinkedListDeque<T> implements Deque<T> {
     /** Same as get, but uses recursion. */
     public T getRecursive(int index) {
         return getRecursivehelper(index, sentinel.next);
+    }
+
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
+    }
+
+    private class LinkedListDequeIterator implements Iterator<T> {
+
+        Node p;
+
+        public LinkedListDequeIterator() {
+            p = sentinel.next;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return p != sentinel;
+        }
+
+        @Override
+        public T next() {
+            T nextItem = p.item;
+            p = p.next;
+            return nextItem;
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (this.getClass() != obj.getClass()) {
+            return false;
+        }
+
+        LinkedListDeque<T> o = (LinkedListDeque<T>) obj;
+        if (size() != o.size()) {
+            return false;
+        }
+        Iterator<T> l1 = this.iterator();
+        Iterator<T> l2 = o.iterator();
+        for (int i = 0; i < size(); i++) {
+            if (l1.next() != l2.next()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        List<String> listOfItems = new ArrayList<>();
+        for (T x : this) {
+            listOfItems.add(x.toString());
+        }
+        return "{" + String.join(",", listOfItems) + "}";
+    }
+
+    public static <G> LinkedListDeque<G> of(G... stuff) {
+        LinkedListDeque<G> list = new LinkedListDeque<>();
+        for (G i : stuff) {
+            list.addLast(i);
+        }
+        return list;
     }
 }
