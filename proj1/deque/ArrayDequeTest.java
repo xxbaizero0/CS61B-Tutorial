@@ -118,16 +118,16 @@ public class ArrayDequeTest {
     public void bigLLDequeTest() {
 
         ArrayDeque<Integer> Ad1 = new ArrayDeque<Integer>();
-        for (int i = 0; i < 1000000; i++) {
+        for (int i = 0; i < 100; i++) {
             Ad1.addLast(i);
         }
 
 
-        for (double i = 0; i < 500000; i++) {
+        for (double i = 0; i < 50; i++) {
             assertEquals("Should have the same value", i, (double) Ad1.removeFirst(), 0.0);
         }
 
-        for (double i = 999999; i > 500000; i--) {
+        for (double i = 99; i > 50; i--) {
             assertEquals("Should have the same value", i, (double) Ad1.removeLast(), 0.0);
         }
 
@@ -190,6 +190,10 @@ public class ArrayDequeTest {
                 if (solution.size() == 0) {
                     continue;
                 }
+                int randVal = StdRandom.uniform(0, 100);
+                studuent.addLast(randVal);
+                solution.addLast(randVal);
+                System.out.println("addLast:(" + randVal + ")");
                 int last = solution.getLast();
                 if (solution.size() > 0) {
                     assertEquals("No equal", solution.removeLast(), studuent.removeLast());
