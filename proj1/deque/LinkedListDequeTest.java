@@ -163,7 +163,7 @@ public class LinkedListDequeTest {
                 }
                 int last = solution.getLast();
                 if (solution.size() > 0) {
-                    assertEquals("No equal", studuent.removeFirst(), studuent.removeFirst());
+                    assertEquals("No equal", solution.removeFirst(), studuent.removeFirst());
                     System.out.println("removelast:" + last + ")");
                 } else {
                     System.out.println("No enough size");
@@ -179,6 +179,16 @@ public class LinkedListDequeTest {
         studuent.addLast(operationNumber);
         int getNum = studuent.get(0);
         assertEquals(getNum, operationNumber);
+    }
+    @Test
+    public void equalCheck() {
+        LinkedListDeque<Integer> ls1 = new LinkedListDeque<>();
+        deque.ArrayDeque<Integer> ls2 = new deque.ArrayDeque<>();
+        ls1.addLast(1);
+        ls1.addLast(1);
+        ls2.addLast(1);
+        ls2.addLast(1);
+        assertTrue(ls1.equals(ls2));
     }
 }
 

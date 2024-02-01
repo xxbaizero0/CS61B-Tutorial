@@ -156,15 +156,32 @@ public class ArrayDequeTest {
 
     @Test
     public void checkAM() {
-        ArrayDeque<Integer> studuent = new ArrayDeque<>();
-        studuent.addFirst(2);
-        studuent.addFirst(2);
-        for (int i = 0; i < 9; i++) {
-            studuent.addLast(i);
-        }
-        assertEquals((int) studuent.get(0), 2);
-        assertEquals((int) studuent.get(1), 2);
-        assertEquals((int) studuent.get(2), 0);
+        ArrayDeque<Integer> l1 = new ArrayDeque<>();
+        l1.addLast(0);
+        l1.removeLast();
+        l1.addLast(2);
+        l1.removeFirst();
+        l1.addFirst(4);
+        l1.removeFirst();
+        l1.addFirst(6);
+        l1.removeFirst();
+        l1.addFirst(8);
+        l1.removeFirst();
+        l1.addFirst(10);
+        l1.addLast(11);
+        l1.get(0);
+        l1.addLast(13);
+        l1.get(2);
+        l1.addLast(15);
+        l1.removeLast();
+        l1.addFirst(17);
+        l1.addLast(18);
+        l1.addLast(19);
+        l1.addLast(20);
+        l1.addFirst(21);
+        l1.addFirst(22);
+        int Tu = l1.removeLast();
+        assertEquals(Tu, 20);
     }
 
     @Test
