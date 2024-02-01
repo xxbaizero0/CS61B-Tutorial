@@ -59,7 +59,9 @@ public class ArrayDeque<T> implements Deque<T>, Iterable<T> {
             int length = item.length - nextFirst - 1;
             System.arraycopy(item, nextLast, a, destPost, length);
             nextFirst = a.length - item.length + nextFirst;
-            nextLast = a.length / 2;
+            if (nextLast == 0) {
+                nextLast = a.length / 2;
+            }
             item = a;
         }
 
