@@ -155,6 +155,17 @@ public class ArrayDequeTest {
 //    }
 
     @Test
+    public void checkRemove() {
+        ArrayDeque<Integer> l1 = new ArrayDeque<>();
+        for (int i = 0; i < 64; i++) {
+            l1.addLast(i);
+        }
+        for (int i = 0; i < 63; i++) {
+            l1.removeLast();
+        }
+    }
+
+    @Test
     public void checkAM() {
         ArrayDeque<Integer> l1 = new ArrayDeque<>();
         l1.addLast(0);
