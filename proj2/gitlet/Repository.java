@@ -26,4 +26,11 @@ public class Repository {
     public static final File GITLET_DIR = join(CWD, ".gitlet");
 
     /* TODO: fill in the rest of this class. */
+    public static void initCommand() {
+        StagingArea.init();
+        GITLET_DIR.mkdir();
+        Commit initialCommit = new Commit();
+        File initialCommitFile = Utils.join(GITLET_DIR, "initialCommit");
+        Utils.writeObject(initialCommitFile, initialCommit);
+    }
 }
