@@ -5,6 +5,7 @@ package gitlet;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date; // TODO: You'll likely use this in this class
+import java.util.HashMap;
 import java.util.Locale;
 
 /** Represents a gitlet commit object.
@@ -26,17 +27,86 @@ public class Commit implements Serializable {
     private String message;
     private String parentID;
     private String timestamp;
+    private String shaName;
 
-    public Commit(String message, String parentID) {
+    public HashMap<String, String> version = new HashMap<String, String>();
+
+    /*
+    personal perspective is that we firstly creat a commit containing message and timestamp, and then when we
+    add the Commit to the CommitTree, we firstly set the ParentID of HEAD pointer, and then we cope the version map of
+    parent, update the version map according to the Stage.
+     */
+
+    public Commit(String message) {
         this.message = message;
-        this.parentID = parentID;
+        this.timestamp = formatDate(true);
     }
+
+    public void setParent(String p) {
+        this.parentID = p;
+    }
+
+
 
     public Commit() {
         this.message = "initial commit";
         this.parentID = null;
         this.timestamp = formatDate(false);
     }
+
+    public void checkLegal() {
+        if (this.message.isEmpty()) {
+            System.out.println("Please enter a commit message.");
+            System.exit(0);
+        }
+        if (StagingArea.additionStage.isEmpty()) {
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
+        }
+    }
+
+    public void updateVersion() {
+        for (String na : version.keySet()) {
+            String preVersion = version.get(na);
+            String curVersion = StagingArea.additionStage.get(na);
+            String rmVersion = StagingArea.removalStage.get(na);
+            if (!preVersion.equals(curVersion)) {
+                version.put(na, curVersion);
+            }
+            version.remove(rmVersion);
+        }
+    }
+
+    public void copyMapTo(Commit c) {
+        HashMap<String, String> copiedVersion = new HashMap<>(this.version);
+        c.setVersionMap(copiedVersion);
+    }
+
+    public void setVersionMap(HashMap<String, String> version) {
+        this.version = version;
+    }
+
+    public String getSha1ID() {
+        return Utils.sha1(this);
+    }
+
+    // toString 方法
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("===");
+        sb.append("\ncommit ").append(shaName);
+        sb.append("\nDate: ").append(timestamp);
+        sb.append("\n").append(message);
+//        if (parents.size() > 1) {
+//            sb.append("\nMerge: ");
+//            sb.append(parents.get(0).getSHA1().substring(0, 7));
+//            sb.append(" ").append(parents.get(1).getSHA1().substring(0, 7));
+//        }
+        sb.append("\n");
+        return sb.toString();
+    }
+
 
     public String getParent() {
         return parentID;
@@ -48,6 +118,10 @@ public class Commit implements Serializable {
 
     public String getTimestamp() {
         return timestamp;
+    }
+
+    public String getShaName() {
+        return shaName;
     }
 
     private String formatDate(boolean isCurrentTime) {

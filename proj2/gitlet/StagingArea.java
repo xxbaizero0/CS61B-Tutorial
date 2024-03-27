@@ -1,7 +1,6 @@
 package gitlet;
 
 import java.io.File;
-import java.io.Serializable;
 
 import java.util.HashMap;
 
@@ -10,37 +9,92 @@ import static gitlet.Utils.join;
 public class StagingArea {
     private static final File CWD = Repository.CWD;
 
-    public static final File indexFold = Utils.join(Repository.GITLET_DIR, ".index");
+    public static final File indexFold = Utils.join(Repository.GITLET_DIR, "object");
 
-    private HashMap<String, Blobs> index = new HashMap<String, Blobs>();
+    public static HashMap<String, String> additionStage = new HashMap<>();
+    public static HashMap<String, String> removalStage = new HashMap<>();
+    public static File additionStageFile = Utils.join(Repository.GITLET_DIR, "additionStage");
+    public static File removalStageFile = Utils.join(Repository.GITLET_DIR, "removalStage");
 
     public static void init() {
+        try {
+            if (!additionStageFile.exists()) {
+                additionStageFile.createNewFile();
+            }
+            Utils.writeObject(additionStageFile, additionStage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        HashMap<String, String> stage = (HashMap<String, String>)Utils.readObject(additionStageFile,HashMap.class);
         //TODO:creat the StagingArea
-        indexFold.mkdir();
+        if (!indexFold.exists()) {
+            indexFold.mkdir();
+            System.out.println(".index creat");
+        }
     }
 
-    private void add(String name) {
+    public static void add(String name) {
         //TODO:Serialize the file added and then store in the StagingArea
         //TODO:How to get the file of the name?
         /*
-        将文件的当前副本添加到暂存区（参见 commit 命令的描述）。因此，添加文件也称为为添加而暂存文件。将已经暂存的文件暂存会使用新内容覆盖暂存区中的先前条目。
-        暂存区应该位于.gitlet的某个地方。如果文件的当前工作版本与当前提交中的版本相同，则不要将其暂存以添加，
-        并且如果已经存在（当文件更改、添加，然后更改回其原始版本时可能会发生）的情况下，从暂存区删除它。
-        文件将不再被暂存以删除（请参见 gitlet rm），如果在命令时处于该状态。
-        如果文件不存在，则打印错误消息 File does not exist. 并且退出而不更改任何内容。
          */
         File addFile = findAddFile(name);
         if (addFile == null) {
             System.out.println("File does not exist.");
-            return;
+            System.exit(0);
         }
         Blobs blob = new Blobs(name, addFile);
-        String blobSha2 = blob.getSha1ID().substring(0,2);
-        String blobSha = blob.getSha1ID();
-        index.put(blob.getSha1ID(), blob);
-        File storeFile = Utils.join(indexFold,blobSha2, blobSha);
-        Utils.writeObject(storeFile, blob);
+        saveBlobs(blob);
+        additionStage.put(name, blob.getSha1ID());
     }
+
+    public static void rm(String name) {
+        //TODO: if add, cancel
+        if (additionStage.containsKey(name)) {
+            additionStage.remove(name);
+        } else if (CommitTree.HEAD.version.containsKey(name)) {
+            String rmID = additionStage.get(name);
+            removalStage.put(name, rmID);
+            File file = Utils.join(CWD, name);
+            if (file.exists()) {
+                file.delete();
+            }
+        } else {
+            System.out.println("No reason to remove the file");
+        }
+        //TODO: if commmit and track, remark delete and rm from CWD
+    }
+
+    public static void cleanStage() {
+        additionStage.clear();
+    }
+
+    private static File fromFile(String SHA) {
+        String blobSha2 = SHA.substring(0,2);
+        String fileName = SHA.substring(2);
+        File storeFile = Utils.join(indexFold, blobSha2, fileName);
+        return Utils.readObject(storeFile, File.class);
+    }
+
+    private static void saveBlobs(Blobs blob) {
+        String blobSha = blob.getSha1ID();
+        String blobSha2 = blobSha.substring(0,2);
+        String fileName = blobSha.substring(2);
+        File storeFile = Utils.join(indexFold, blobSha2, fileName);
+        File storeFileFold = Utils.join(indexFold, blobSha2);
+        try {
+            if (!storeFileFold.exists()) {
+                storeFileFold.mkdir();
+            }
+            if (!storeFile.exists()) {
+                storeFile.createNewFile();
+            }
+            Utils.writeObject(storeFile, blob);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private static File findAddFile(String name) {
         File[] files = CWD.listFiles();
@@ -52,37 +106,6 @@ public class StagingArea {
             }
         }
         return null;
-    }
-
-
-    public class Blobs implements Serializable {
-        //TODO: a Blobs should contain the file, fileName, sha1ID
-        /*
-        TODO: should the Blobs contain a file?
-        think about the commit's stuff
-         */
-        String fileName;
-        String sha1ID;
-
-        File file;
-
-        public Blobs(String name, File file) {
-            this.fileName = name;
-            this.file = file;
-            this.sha1ID = Utils.sha1(this.file);
-        }
-
-        public File getFile() {
-            return file;
-        }
-
-        public String getFileName() {
-            return fileName;
-        }
-
-        public String getSha1ID() {
-            return sha1ID;
-        }
     }
 }
 
