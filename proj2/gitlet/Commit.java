@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date; // TODO: You'll likely use this in this class
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 /** Represents a gitlet commit object.
@@ -25,7 +26,7 @@ public class Commit implements Serializable {
 
     /** The message of this Commit. */
     private String message;
-    private String parentID;
+    private List<String> parentID;
     private String timestamp;
     private String shaName;
 
@@ -43,7 +44,7 @@ public class Commit implements Serializable {
     }
 
     public void setParent(String p) {
-        this.parentID = p;
+        this.parentID.add(p);
     }
 
 
@@ -98,18 +99,20 @@ public class Commit implements Serializable {
         sb.append("\ncommit ").append(shaName);
         sb.append("\nDate: ").append(timestamp);
         sb.append("\n").append(message);
-//        if (parents.size() > 1) {
-//            sb.append("\nMerge: ");
-//            sb.append(parents.get(0).getSHA1().substring(0, 7));
-//            sb.append(" ").append(parents.get(1).getSHA1().substring(0, 7));
-//        }
+        if (parentID.size() > 1) {
+            sb.append("\nMerge: ");
+            Commit par1 = CommitTree.fromFile(parentID.get(0));
+            Commit par2 = CommitTree.fromFile(parentID.get(1));
+            sb.append(par1.getSha1ID(), 0, 7);
+            sb.append(" ").append(par2.getSha1ID(), 0, 7);
+        }
         sb.append("\n");
         return sb.toString();
     }
 
 
     public String getParent() {
-        return parentID;
+        return parentID.get(0);
     }
 
     public String getMessage() {

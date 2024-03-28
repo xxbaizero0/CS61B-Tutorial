@@ -3,6 +3,7 @@ package gitlet;
 import java.io.File;
 
 import java.util.HashMap;
+import java.util.List;
 
 import static gitlet.Utils.join;
 
@@ -10,6 +11,8 @@ public class StagingArea {
     private static final File CWD = Repository.CWD;
 
     public static final File indexFold = Utils.join(Repository.GITLET_DIR, "object");
+
+    public static List<String> blobs;
 
     public static HashMap<String, String> additionStage = new HashMap<>();
     public static HashMap<String, String> removalStage = new HashMap<>();
@@ -21,11 +24,14 @@ public class StagingArea {
             if (!additionStageFile.exists()) {
                 additionStageFile.createNewFile();
             }
-            Utils.writeObject(additionStageFile, additionStage);
+            if (!removalStageFile.exists()) {
+                removalStageFile.createNewFile();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        HashMap<String, String> stage = (HashMap<String, String>)Utils.readObject(additionStageFile,HashMap.class);
+        additionStage = (HashMap<String, String>)Utils.readObject(additionStageFile,HashMap.class);
+        removalStage = (HashMap<String, String>)Utils.readObject(removalStageFile,HashMap.class);
         //TODO:creat the StagingArea
         if (!indexFold.exists()) {
             indexFold.mkdir();
@@ -44,6 +50,7 @@ public class StagingArea {
             System.exit(0);
         }
         Blobs blob = new Blobs(name, addFile);
+        blobs.add(blob.getFileName());
         saveBlobs(blob);
         additionStage.put(name, blob.getSha1ID());
     }
@@ -67,6 +74,7 @@ public class StagingArea {
 
     public static void cleanStage() {
         additionStage.clear();
+        removalStage.clear();
     }
 
     private static File fromFile(String SHA) {

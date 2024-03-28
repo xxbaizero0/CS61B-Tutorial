@@ -1,7 +1,8 @@
 package gitlet;
 
 import java.io.File;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 // TODO: any imports you need here
 
@@ -20,9 +21,13 @@ public class Repository {
      * variable is used. We've provided two examples for you.
      */
 
-    /** The current working directory. */
+    /**
+     * The current working directory.
+     */
     public static final File CWD = new File(System.getProperty("user.dir"));
-    /** The .gitlet directory. */
+    /**
+     * The .gitlet directory.
+     */
     public static final File GITLET_DIR = Utils.join(CWD, ".gitlet");
 
     // the HashMap of the version of File
@@ -51,7 +56,93 @@ public class Repository {
         CommitTree.addCommit(commit);
     }
 
-    public static String getLog() {
-        return CommitTree.log;
+    public static void getLog() {
+        System.out.println(CommitTree.getLog(CommitTree.HEAD));
+    }
+
+    public static void getGlobalLog() {
+        StringBuilder log = new StringBuilder();
+        List<String> commitList = getComitList();
+        for (String com : commitList) {
+            log.append(CommitTree.fromFile(com).toString());
+        }
+        System.out.println(log.toString());
+    }
+
+    private static List<String> getComitList() {
+        List<String> FileList = Utils.plainFilenamesIn(CommitTree.indexFold);
+        List<String> commitList = new ArrayList<>();
+        if (FileList != null) {
+            for (String com : FileList) {
+                if (!StagingArea.blobs.contains(com)) {
+                    commitList.add(com);
+                }
+            }
+        }
+        return commitList;
+    }
+
+    public static void find(String arg) {
+        StringBuilder findResult = new StringBuilder();
+        List<String> commitList = getComitList();
+        for (String com : commitList) {
+            Commit c = CommitTree.fromFile(com);
+            if (c.getMessage().equals(arg)) {
+                findResult.append(c.getSha1ID());
+                findResult.append('\n');
+            }
+        }
+        System.out.println(findResult.toString());
+    }
+
+    public static void status() {
+        printBranches();
+        printStagedFile();
+        printRemovedFiles();
+        printModifiedNotStagedFile();
+        printUntrackedFiles();
+    }
+
+    private static void printBranches() {
+        List<String> branchList = Utils.plainFilenamesIn(CommitTree.head);
+//        currBranch = readCurrBranch();
+//        System.out.println("=== Branches ===");
+//        System.out.println("*" + currBranch);
+//        if (branchList.size() > 1) {
+//            for (String branch : branchList) {
+//                if (!branch.equals(currBranch)) {
+//                    System.out.println(branch);
+//                }
+//            }
+//        }
+        System.out.println();
+    }
+
+    private static void printStagedFile() {
+        System.out.println("=== Staged Files ===");
+//        addStage = StagingArea.additionStage;
+//        for (Blobs b : addStage) {
+//            System.out.println(b.getFileName());
+//        }
+        System.out.println();
+    }
+
+    private static void printRemovedFiles() {
+        System.out.println("=== Removed Files ===");
+//        removeStage = readRemoveStage();
+//        for (Blob b : removeStage.getBlobList()) {
+//            System.out.println(b.getFileName());
+//        }
+        System.out.println();
+    }
+
+    private static void printModifiedNotStagedFile() {
+        System.out.println("=== Modifications Not Staged For Commit ===");
+        System.out.println();
+    }
+
+    private static void printUntrackedFiles() {
+        System.out.println("=== Untracked Files ===");
+        System.out.println();
     }
 }

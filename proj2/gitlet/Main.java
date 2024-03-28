@@ -27,6 +27,30 @@ public class Main {
             case "log":
                 Repository.getLog();
                 break;
+            case "global-log":
+                Repository.getGlobalLog();
+                break;
+            case "find":
+                Repository.find(args[1]);
+                break;
+            case "status":
+                Repository.status();
+                break;
+            case "checkout":
+                //Repository.checkout();
+                break;
+            case "branch":
+                //Repository.branch();
+                break;
+            case "rm-branch":
+                //Repository.rmBranch();
+                break;
+            case "reset":
+                //Repository.reset();
+                break;
+            case "merge":
+                //Repository.merge();
+                break;
         }
     }
 }

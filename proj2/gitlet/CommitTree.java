@@ -14,6 +14,8 @@ public class CommitTree {
 
     static String log;
 
+    static StringBuilder logSB;
+
     public static void init() {
         try {
             if (!refs.exists()) {
@@ -36,6 +38,16 @@ public class CommitTree {
         }
     }
 
+    public static String getLog(Commit commit) {
+        if (commit.getParent() == null) {
+            String log1 = logSB.toString();
+            logSB = new StringBuilder();
+            return log1;
+        }
+        logSB.append(commit.toString());
+        return getLog(fromFile(commit.getParent()));
+    }
+
     public static void addCommit(Commit c) {
         c.setParent(HEAD.getShaName());
         HEAD.copyMapTo(c);
@@ -45,15 +57,15 @@ public class CommitTree {
         Utils.writeObject(master, Master);
         c.updateVersion();
         c.checkLegal();
-        log += c.toString();
+        //log += c.toString();
         saveCommit(c);
     }
 
-    private File fromFile(String SHA) {
+    public static Commit fromFile(String SHA) {
         String commitSha2 = SHA.substring(0,2);
         String fileName = SHA.substring(2);
         File storeFile = Utils.join(indexFold, commitSha2, fileName);
-        return Utils.readObject(storeFile, File.class);
+        return Utils.readObject(storeFile, Commit.class);
     }
 
     private static void saveCommit(Commit commit) {
