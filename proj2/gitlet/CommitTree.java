@@ -26,7 +26,8 @@ public class CommitTree {
             HEAD = Utils.readObject(head, Commit.class);
             Master = Utils.readObject(master, Branch.class);
             Master.setActivity(true);
-            readCurBrunch();
+            curBranch = Master;
+            readCurBranch();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,7 +50,7 @@ public class CommitTree {
             HEAD.copyMapTo(c);
         }
         HEAD = c;
-        curBranch.commit = HEAD;
+        curBranch.setCommit(HEAD);
         Utils.writeObject(head, HEAD);
         Utils.writeObject(curBranch.getBranchPath(), curBranch);
         c.updateVersion();
@@ -85,7 +86,7 @@ public class CommitTree {
         }
     }
 
-    public static void readCurBrunch() {
+    public static void readCurBranch() {
         List<String> branchList = Utils.plainFilenamesIn(CommitTree.heads);
         for (String c : branchList){
             File c1 = Utils.join(heads, c);
@@ -95,6 +96,10 @@ public class CommitTree {
                 curBranch = c2;
             }
         }
+    }
+
+    public static String getCurBranch() {
+        return curBranch.getName();
     }
 
 
@@ -126,6 +131,10 @@ public class CommitTree {
             return activity;
         }
 
+        public File getBranchPath() {
+            return branchPath;
+        }
+
         public void setActivity(Boolean activity) {
             this.activity = activity;
         }
@@ -134,8 +143,8 @@ public class CommitTree {
             activity = !activity;
         }
 
-        public File getBranchPath() {
-            return branchPath;
+        public void setCommit(Commit commit) {
+            this.commit = commit;
         }
     }
 }

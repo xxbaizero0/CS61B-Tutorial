@@ -2,7 +2,9 @@ package gitlet;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 // TODO: any imports you need here
 
@@ -43,9 +45,9 @@ public class Repository {
         StagingArea.indexFold.mkdir();
         CommitTree.refs.mkdir();
         CommitTree.heads.mkdir();
+        CommitTree.init();
         init();
         StagingArea.init();
-        CommitTree.init();
     }
 
     private static void init() {
@@ -109,34 +111,34 @@ public class Repository {
 
     private static void printBranches() {
         List<String> branchList = Utils.plainFilenamesIn(CommitTree.heads);
-//        currBranch = readCurrBranch();
-//        System.out.println("=== Branches ===");
-//        System.out.println("*" + currBranch);
-//        if (branchList.size() > 1) {
-//            for (String branch : branchList) {
-//                if (!branch.equals(currBranch)) {
-//                    System.out.println(branch);
-//                }
-//            }
-//        }
+        String curBranch = CommitTree.getCurBranch();
+        System.out.println("=== Branches ===");
+        System.out.println("*" + curBranch);
+        if (branchList.size() > 1) {
+            for (String branch : branchList) {
+                if (!branch.equals(curBranch)) {
+                    System.out.println(branch);
+                }
+            }
+        }
         System.out.println();
     }
 
     private static void printStagedFile() {
         System.out.println("=== Staged Files ===");
-//        addStage = StagingArea.additionStage;
-//        for (Blobs b : addStage) {
-//            System.out.println(b.getFileName());
-//        }
+        Set<String> addStage = StagingArea.additionStage.keySet();
+        for (String b : addStage) {
+            System.out.println(b);
+        }
         System.out.println();
     }
 
     private static void printRemovedFiles() {
         System.out.println("=== Removed Files ===");
-//        removeStage = readRemoveStage();
-//        for (Blob b : removeStage.getBlobList()) {
-//            System.out.println(b.getFileName());
-//        }
+        Set<String> removeStage = StagingArea.removalStage.keySet();
+        for (String b : removeStage) {
+            System.out.println(b);
+        }
         System.out.println();
     }
 
