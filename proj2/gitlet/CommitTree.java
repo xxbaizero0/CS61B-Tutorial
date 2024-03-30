@@ -1,13 +1,15 @@
 package gitlet;
+
 import java.io.File;
-import java.io.Serializable;
-import java.util.List;
+import java.util.Objects;
 
 public class CommitTree {
     public static Commit HEAD;
-    public static Branch Master;
+    public static Commit Master;
 
-    public static Branch curBranch;
+    public static String curBranchName;
+
+    public static Commit curBranch;
     static File indexFold = StagingArea.indexFold;
 
     static File head = Utils.join(Repository.GITLET_DIR, "HEAD"); //file
@@ -24,10 +26,8 @@ public class CommitTree {
             master.createNewFile();
             head.createNewFile();
             HEAD = Utils.readObject(head, Commit.class);
-            Master = Utils.readObject(master, Branch.class);
-            Master.setActivity(true);
-            curBranch = Master;
-            readCurBranch();
+            Master = Utils.readObject(master, Commit.class);
+            curBranchName = "Master";
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,10 +49,13 @@ public class CommitTree {
             c.setParent(HEAD.getShaName());
             HEAD.copyMapTo(c);
         }
+        if (HEAD == null) {
+            curBranchName = "Master";
+        }
         HEAD = c;
-        curBranch.setCommit(HEAD);
+        curBranch = c;
         Utils.writeObject(head, HEAD);
-        Utils.writeObject(curBranch.getBranchPath(), curBranch);
+        Utils.writeObject(Utils.join(heads, curBranchName), curBranch);
         c.updateVersion();
         c.checkLegal();
         //log += c.toString();
@@ -86,65 +89,11 @@ public class CommitTree {
         }
     }
 
-    public static void readCurBranch() {
-        List<String> branchList = Utils.plainFilenamesIn(CommitTree.heads);
-        for (String c : branchList){
-            File c1 = Utils.join(heads, c);
-            Branch c2 = Utils.readObject(c1, Branch.class);
-            if (c2.getActivity()) {
-                curBranch.branchPath = c1;
-                curBranch = c2;
-            }
-        }
+    public static void setBranch(String name) {
+        curBranchName = name;
     }
 
-    public static String getCurBranch() {
-        return curBranch.getName();
-    }
-
-
-    class Branch implements Serializable {
-        Commit commit;
-        Boolean activity;
-
-        File branchPath;
-
-        public Branch (Commit com, Boolean act, File path) {
-            this.commit = com;
-            this.activity = act;
-            this.branchPath = path;
-        }
-
-        public void setBranchPath(File branchPath) {
-            this.branchPath = branchPath;
-        }
-
-        public Commit getCommit() {
-            return commit;
-        }
-
-        public String getName() {
-            return commit.getShaName();
-        }
-
-        public Boolean getActivity() {
-            return activity;
-        }
-
-        public File getBranchPath() {
-            return branchPath;
-        }
-
-        public void setActivity(Boolean activity) {
-            this.activity = activity;
-        }
-
-        public void setActivity() {
-            activity = !activity;
-        }
-
-        public void setCommit(Commit commit) {
-            this.commit = commit;
-        }
+    public static String readCurBranch() {
+        return Objects.requireNonNull(Utils.plainFilenamesIn(Utils.join(heads, curBranchName))).get(0);
     }
 }

@@ -2,7 +2,6 @@ package gitlet;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -45,9 +44,9 @@ public class Repository {
         StagingArea.indexFold.mkdir();
         CommitTree.refs.mkdir();
         CommitTree.heads.mkdir();
-        CommitTree.init();
         init();
         StagingArea.init();
+        CommitTree.init();
     }
 
     private static void init() {
@@ -111,7 +110,7 @@ public class Repository {
 
     private static void printBranches() {
         List<String> branchList = Utils.plainFilenamesIn(CommitTree.heads);
-        String curBranch = CommitTree.getCurBranch();
+        String curBranch = CommitTree.readCurBranch();
         System.out.println("=== Branches ===");
         System.out.println("*" + curBranch);
         if (branchList.size() > 1) {
