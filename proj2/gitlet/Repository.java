@@ -35,16 +35,20 @@ public class Repository {
 
     /* TODO: fill in the rest of this class. */
     public static void initCommand() {
-        StagingArea.init();
+        if (GITLET_DIR.exists()) {
+            System.out.println("A Gitlet version-control system already exists in the current directory.");
+            System.exit(0);;
+        }
+        GITLET_DIR.mkdir();
+        StagingArea.indexFold.mkdir();
+        CommitTree.refs.mkdir();
+        CommitTree.heads.mkdir();
         init();
+        StagingArea.init();
+        CommitTree.init();
     }
 
     private static void init() {
-        if (GITLET_DIR.exists()) {
-            System.out.println("A Gitlet version-control system already exists in the current directory.");
-            return;
-        }
-        GITLET_DIR.mkdir();
         Commit initialCommit = new Commit();
         CommitTree.addCommit(initialCommit);
         File initialCommitFile = Utils.join(GITLET_DIR, "initialCommit");

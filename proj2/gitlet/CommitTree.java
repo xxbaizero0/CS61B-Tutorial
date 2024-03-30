@@ -14,23 +14,12 @@ public class CommitTree {
 
     static String log;
 
-    static StringBuilder logSB;
+    static StringBuilder logSB = new StringBuilder();
 
     public static void init() {
         try {
-            if (!refs.exists()) {
-                refs.mkdir();
-            }
-            if (!heads.exists()) {
-                heads.mkdir();
-            }
-            if (!master.exists()) {
-                master.createNewFile();
-
-            }
-            if (!head.exists()) {
-                head.createNewFile();
-            }
+            master.createNewFile();
+            head.createNewFile();
             HEAD = Utils.readObject(head, Commit.class);
             Master = Utils.readObject(master, Commit.class);
         } catch (Exception e) {
@@ -40,17 +29,20 @@ public class CommitTree {
 
     public static String getLog(Commit commit) {
         if (commit.getParent() == null) {
+            logSB.append(commit);
             String log1 = logSB.toString();
             logSB = new StringBuilder();
             return log1;
         }
-        logSB.append(commit.toString());
+        logSB.append(commit);
         return getLog(fromFile(commit.getParent()));
     }
 
     public static void addCommit(Commit c) {
-        c.setParent(HEAD.getShaName());
-        HEAD.copyMapTo(c);
+        if (HEAD != null) {
+            c.setParent(HEAD.getShaName());
+            HEAD.copyMapTo(c);
+        }
         HEAD = c;
         Master = c;
         Utils.writeObject(head, HEAD);

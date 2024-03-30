@@ -4,10 +4,7 @@ package gitlet;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Date; // TODO: You'll likely use this in this class
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /** Represents a gitlet commit object.
  *  TODO: It's a good idea to give a description here of what else this Class
@@ -26,7 +23,7 @@ public class Commit implements Serializable {
 
     /** The message of this Commit. */
     private String message;
-    private List<String> parentID;
+    private List<String> parentID = new ArrayList<>();
     private String timestamp;
     private String shaName;
 
@@ -41,18 +38,18 @@ public class Commit implements Serializable {
     public Commit(String message) {
         this.message = message;
         this.timestamp = formatDate(true);
+        this.shaName = getSha1ID();
     }
 
     public void setParent(String p) {
         this.parentID.add(p);
     }
 
-
-
     public Commit() {
         this.message = "initial commit";
         this.parentID = null;
         this.timestamp = formatDate(false);
+        this.shaName = getSha1ID();
     }
 
     public void checkLegal() {
@@ -60,7 +57,7 @@ public class Commit implements Serializable {
             System.out.println("Please enter a commit message.");
             System.exit(0);
         }
-        if (StagingArea.additionStage.isEmpty()) {
+        if (StagingArea.additionStage.isEmpty() && this.parentID != null) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
         }
@@ -88,7 +85,7 @@ public class Commit implements Serializable {
     }
 
     public String getSha1ID() {
-        return Utils.sha1(this);
+        return Utils.sha1(formatDate(true), message);
     }
 
     // toString 方法
@@ -99,7 +96,7 @@ public class Commit implements Serializable {
         sb.append("\ncommit ").append(shaName);
         sb.append("\nDate: ").append(timestamp);
         sb.append("\n").append(message);
-        if (parentID.size() > 1) {
+        if (parentID != null && parentID.size() > 1) {
             sb.append("\nMerge: ");
             Commit par1 = CommitTree.fromFile(parentID.get(0));
             Commit par2 = CommitTree.fromFile(parentID.get(1));
@@ -112,6 +109,9 @@ public class Commit implements Serializable {
 
 
     public String getParent() {
+        if (parentID == null) {
+            return null;
+        }
         return parentID.get(0);
     }
 
