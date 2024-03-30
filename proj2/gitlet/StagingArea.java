@@ -11,14 +11,14 @@ import static gitlet.Utils.join;
 public class StagingArea {
     private static final File CWD = Repository.CWD;
 
-    public static File indexFold = Utils.join(Repository.GITLET_DIR, "object");
+    public static File indexFold = Utils.join(Repository.GITLET_DIR, "object");//folder
 
     public static List<String> blobs = new ArrayList<>();
 
     public static HashMap<String, String> additionStage = new HashMap<>();
     public static HashMap<String, String> removalStage = new HashMap<>();
-    public static File additionStageFile = Utils.join(Repository.GITLET_DIR, "additionStage");
-    public static File removalStageFile = Utils.join(Repository.GITLET_DIR, "removalStage");
+    public static File additionStageFile = Utils.join(Repository.GITLET_DIR, "additionStage");//file
+    public static File removalStageFile = Utils.join(Repository.GITLET_DIR, "removalStage"); //file
 
 
     public static void init() {

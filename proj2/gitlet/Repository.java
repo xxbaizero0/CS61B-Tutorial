@@ -51,8 +51,8 @@ public class Repository {
     private static void init() {
         Commit initialCommit = new Commit();
         CommitTree.addCommit(initialCommit);
-        File initialCommitFile = Utils.join(GITLET_DIR, "initialCommit");
-        Utils.writeObject(initialCommitFile, initialCommit);
+//        File initialCommitFile = Utils.join(GITLET_DIR, "initialCommit");
+//        Utils.writeObject(initialCommitFile, initialCommit);
     }
 
     public static void commit(String message) {
@@ -108,7 +108,7 @@ public class Repository {
     }
 
     private static void printBranches() {
-        List<String> branchList = Utils.plainFilenamesIn(CommitTree.head);
+        List<String> branchList = Utils.plainFilenamesIn(CommitTree.heads);
 //        currBranch = readCurrBranch();
 //        System.out.println("=== Branches ===");
 //        System.out.println("*" + currBranch);
