@@ -150,4 +150,25 @@ public class Repository {
         System.out.println("=== Untracked Files ===");
         System.out.println();
     }
+
+    public static void checkout(String fileName) {
+    }
+
+    public static void checkout(String ID, String fileName) {
+    }
+
+    public static void checkoutBranch(String branchName) {
+    }
+
+    public static void branch(String arg) {
+        CommitTree.creatBranch(arg);
+    }
+
+    public static void rmBranch(String arg) {
+
+    }
+
+    public static void rm(String arg) {
+        StagingArea.rm(arg);
+    }
 }

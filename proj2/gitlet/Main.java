@@ -24,6 +24,8 @@ public class Main {
             case "commit":
                 Repository.commit(args[1]);
                 break;
+            case "rm":
+                Repository.rm(args[1]);
             case "log":
                 Repository.getLog();
                 break;
@@ -37,13 +39,40 @@ public class Main {
                 Repository.status();
                 break;
             case "checkout":
-                //Repository.checkout();
+                switch (args.length) {
+                    case 3:
+                        if (!args[1].equals("--")) {
+                            System.out.println("Incorrect operands.");
+                            System.exit(0);
+                        }
+                        /* * checkout -- [file name] */
+                        Repository.checkout(args[2]);
+                        break;
+
+                    case 4:
+                        if (!args[2].equals("--")) {
+                            System.out.println("Incorrect operands.");
+                            System.exit(0);
+                        }
+                        /* * checkout [commit id] -- [file name] */
+                        Repository.checkout(args[1], args[3]);
+                        break;
+
+                    case 2:
+                        /* * checkout [branch name] */
+                        Repository.checkoutBranch(args[1]);
+                        break;
+
+                    default:
+                        System.out.println("Incorrect operands.");
+                        System.exit(0);
+                }
                 break;
             case "branch":
-                //Repository.branch();
+                Repository.branch(args[1]);
                 break;
             case "rm-branch":
-                //Repository.rmBranch();
+                Repository.rmBranch(args[1]);
                 break;
             case "reset":
                 //Repository.reset();

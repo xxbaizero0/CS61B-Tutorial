@@ -84,6 +84,7 @@ public class StagingArea {
             }
         } else {
             System.out.println("No reason to remove the file");
+            System.exit(0);
         }
         //TODO: if commmit and track, remark delete and rm from CWD
     }

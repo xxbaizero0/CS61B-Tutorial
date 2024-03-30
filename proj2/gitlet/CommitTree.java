@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 
 public class CommitTree {
@@ -58,6 +59,7 @@ public class CommitTree {
         Utils.writeObject(Utils.join(heads, curBranchName), curBranch);
         c.updateVersion();
         c.checkLegal();
+        StagingArea.cleanStage();
         //log += c.toString();
         saveCommit(c);
     }
@@ -95,5 +97,35 @@ public class CommitTree {
 
     public static String readCurBranch() {
         return Objects.requireNonNull(Utils.plainFilenamesIn(Utils.join(heads, curBranchName))).get(0);
+    }
+
+    public static void creatBranch(String name) {
+        File b = Utils.join(heads, name);
+        if (b.exists()) {
+            System.out.println("A branch with that name already exists.");
+            System.exit(0);
+        }
+        try {
+            b.createNewFile();
+            Utils.writeObject(b, head);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void rmBranch(String name) {
+        List<String> headList = Utils.plainFilenamesIn(heads);
+        for (String h : headList) {
+            if (h.equals(name)) {
+                File b = Utils.join(heads, h);
+                if (Utils.readObject(b, Commit.class).equals(HEAD)) {
+                    System.out.println("Cannot remove the current branch.");
+                    System.exit(0);
+                }
+                b.delete();
+            }
+        }
+        System.out.println("A branch with that name does not exist.");
+        System.exit(0);
     }
 }
