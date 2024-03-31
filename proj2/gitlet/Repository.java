@@ -108,9 +108,36 @@ public class Repository {
         printUntrackedFiles();
     }
 
+
+
+    public static void checkout(String fileName) {
+        CommitTree.checkout(fileName);
+    }
+
+    public static void checkout(String ID, String fileName) {
+        CommitTree.checkout(ID, fileName);
+    }
+
+    public static void checkoutBranch(String branchName) {
+        CommitTree.checkoutBranch(branchName);
+
+    }
+
+    public static void branch(String arg) {
+        CommitTree.creatBranch(arg);
+    }
+
+    public static void rmBranch(String arg) {
+        CommitTree.rmBranch(arg);
+    }
+
+    public static void rm(String arg) {
+        StagingArea.rm(arg);
+    }
+
     private static void printBranches() {
         List<String> branchList = Utils.plainFilenamesIn(CommitTree.heads);
-        String curBranch = CommitTree.readCurBranch();
+        String curBranch = CommitTree.readCurBranchAsString();
         System.out.println("=== Branches ===");
         System.out.println("*" + curBranch);
         if (branchList.size() > 1) {
@@ -125,6 +152,7 @@ public class Repository {
 
     private static void printStagedFile() {
         System.out.println("=== Staged Files ===");
+        StagingArea.readAddStage();
         Set<String> addStage = StagingArea.additionStage.keySet();
         for (String b : addStage) {
             System.out.println(b);
@@ -134,6 +162,7 @@ public class Repository {
 
     private static void printRemovedFiles() {
         System.out.println("=== Removed Files ===");
+        StagingArea.readRmStage();
         Set<String> removeStage = StagingArea.removalStage.keySet();
         for (String b : removeStage) {
             System.out.println(b);
@@ -149,26 +178,5 @@ public class Repository {
     private static void printUntrackedFiles() {
         System.out.println("=== Untracked Files ===");
         System.out.println();
-    }
-
-    public static void checkout(String fileName) {
-    }
-
-    public static void checkout(String ID, String fileName) {
-    }
-
-    public static void checkoutBranch(String branchName) {
-    }
-
-    public static void branch(String arg) {
-        CommitTree.creatBranch(arg);
-    }
-
-    public static void rmBranch(String arg) {
-
-    }
-
-    public static void rm(String arg) {
-        StagingArea.rm(arg);
     }
 }

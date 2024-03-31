@@ -33,7 +33,10 @@ public class StagingArea {
     }
 
     @SuppressWarnings("unchecked")
-    private static void readAddStage() {
+    public static void readAddStage() {
+        if (Utils.readContentsAsString(additionStageFile).isEmpty()) {
+            return;
+        }
         HashMap additionalStageObj = Utils.readObject(additionStageFile, HashMap.class);
         if (additionalStageObj != null) {
             additionStage = (HashMap<String, String>) additionalStageObj;
@@ -41,7 +44,10 @@ public class StagingArea {
     }
 
     @SuppressWarnings("unchecked")
-    private static void readRmStage() {
+    public static void readRmStage() {
+        if (Utils.readContentsAsString(removalStageFile).isEmpty()) {
+            return;
+        }
         HashMap removalStageObj = Utils.readObject(removalStageFile, HashMap.class);
         if (removalStageObj != null) {
             removalStage = (HashMap<String, String>)removalStageObj;
@@ -94,11 +100,17 @@ public class StagingArea {
         removalStage.clear();
     }
 
-    private static Blobs fromFile(String SHA) {
+    public static Blobs fromFile(String SHA) {
         String blobSha2 = SHA.substring(0,2);
         String fileName = SHA.substring(2);
         File storeFile = Utils.join(indexFold, blobSha2, fileName);
         return Utils.readObject(storeFile, Blobs.class);
+    }
+
+    public static File getFile(String SHA) {
+        String blobSha2 = SHA.substring(0,2);
+        String fileName = SHA.substring(2);
+        return Utils.join(indexFold, blobSha2, fileName);
     }
 
     private static void saveBlobs(Blobs blob) {

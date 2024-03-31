@@ -80,6 +80,9 @@ public class Main {
             case "merge":
                 //Repository.merge();
                 break;
+            default:
+                System.out.println("No command with that name exists.");
+                System.exit(0);
         }
     }
 }

@@ -41,6 +41,10 @@ public class Commit implements Serializable {
         this.shaName = getSha1ID();
     }
 
+    public String getFlieVersion(String name) {
+        return version.get(name);
+    }
+
     public void setParent(String p) {
         this.parentID.add(p);
     }
@@ -117,6 +121,10 @@ public class Commit implements Serializable {
 
     public String getMessage() {
         return message;
+    }
+
+    public HashMap<String, String> getVersion() {
+        return version;
     }
 
     public String getTimestamp() {
