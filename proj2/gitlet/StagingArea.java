@@ -26,7 +26,6 @@ public class StagingArea {
             additionStageFile.createNewFile();
             removalStageFile.createNewFile();
         //TODO:creat the StagingArea
-            System.out.println(".index creat");
         } catch (Exception e) {
             e.printStackTrace();
         }
