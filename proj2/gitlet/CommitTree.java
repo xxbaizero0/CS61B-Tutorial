@@ -23,22 +23,18 @@ public class CommitTree {
     static File CURBranch = Utils.join(Repository.GITLET_DIR, "curBranch");//file
 
     static File commitList = Utils.join(refs, "cList");
-    static HashMap<String, Commit> cList = new HashMap<>();
+    static List<String> cList = new ArrayList<>();
 
     static StringBuilder logSB = new StringBuilder();
 
     public static void addCList(String name) {
-        cList.put(name, fromFile(name));
-        Utils.writeObject(commitList, cList);
+        cList.add(name);
+        Utils.writeObject(commitList, (Serializable) cList);
     }
 
     @SuppressWarnings("unchecked")
     public static void readCList() {
-        cList = (HashMap<String, Commit>) Utils.readObject(commitList, HashMap.class);
-    }
-
-    public static Commit getClist(String name) {
-        return cList.get(name);
+        cList = (List<String>) Utils.readObject(commitList, ArrayList.class);
     }
 
     public static void init() {

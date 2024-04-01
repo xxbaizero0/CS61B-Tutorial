@@ -58,7 +58,11 @@ public class Text {
     public static void test1() {
         Main.main(init);
         add("hello.txt");
-        commit("Tow files");
+        commit("1 files");
+        add("hello2.txt");
+        commit("2");
+        add("hello3.txt");
+        commit("3");
         glog();
 
 //        Main.main(add);

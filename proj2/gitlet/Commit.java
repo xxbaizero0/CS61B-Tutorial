@@ -87,7 +87,7 @@ public class Commit implements Serializable {
             String preVersion = version.get(na);
             String curVersion = StagingArea.getAddStage(na);
             String rmVersion = StagingArea.getRevStage(na);
-            if (!preVersion.equals(curVersion)) {
+            if (preVersion != null && !preVersion.equals(curVersion)) {
                 version.put(na, curVersion);
             }
             version.remove(rmVersion);

@@ -95,17 +95,17 @@ public class Repository {
         StringBuilder log = new StringBuilder();
         List<Commit> commitList = getComitList();
         for (Commit com : commitList) {
-            log.append(com.toString());
+            log.insert(0, com.toString());
         }
+        log.delete(log.length() - 2, log.length());
         System.out.println(log);
     }
 
     private static List<Commit> getComitList() {
         CommitTree.readCList();
-        Set<String> cSet = CommitTree.cList.keySet();
         List<Commit> commitList = new ArrayList<>();
-        for (String name : cSet) {
-            commitList.add(CommitTree.getClist(name));
+        for (String name : CommitTree.cList) {
+            commitList.add(CommitTree.fromFile(name));
         }
         return commitList;
     }
