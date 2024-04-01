@@ -1,7 +1,9 @@
 package gitlet;
-
+import gitlet.GitletException;
 import java.io.File;
-import java.nio.charset.StandardCharsets;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -11,29 +13,39 @@ public class CommitTree {
 
     public static String curBranchName;
 
-    public static Commit curBranch;
     static File indexFold = StagingArea.indexFold;
-
 
     static File refs = Utils.join(Repository.GITLET_DIR,"refs"); //folder
     static File heads = Utils.join(refs, "heads"); //folder
-    static File master = Utils.join(heads, "Master"); // file
+    static File master = Utils.join(heads, "master"); // file
     static File head = Utils.join(Repository.GITLET_DIR, "HEAD"); //file
 
-    static File CURBranch = Utils.join(Repository.GITLET_DIR, "curBranch");
+    static File CURBranch = Utils.join(Repository.GITLET_DIR, "curBranch");//file
 
-    static String log;
+    static File commitList = Utils.join(refs, "cList");
+    static HashMap<String, Commit> cList = new HashMap<>();
 
     static StringBuilder logSB = new StringBuilder();
 
+    public static void addCList(String name) {
+        cList.put(name, fromFile(name));
+        Utils.writeObject(commitList, cList);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void readCList() {
+        cList = (HashMap<String, Commit>) Utils.readObject(commitList, HashMap.class);
+    }
+
+    public static Commit getClist(String name) {
+        return cList.get(name);
+    }
+
     public static void init() {
         try {
-            master.createNewFile();
-            head.createNewFile();
-            CURBranch.createNewFile();
             readHEAD();
             Master = Utils.readObject(master, Commit.class);
-            curBranchName = "Master";
+            curBranchName = "master";
             Utils.writeObject(CURBranch, curBranchName);
         } catch (Exception e) {
             e.printStackTrace();
@@ -64,21 +76,26 @@ public class CommitTree {
     public static void addCommit(Commit c) {
         // During the init time, the CT and SA have not yet init;
         if (HEAD == null) {
-            curBranchName = "Master";
+            curBranchName = "master";
             Utils.writeObject(head, c);
             Utils.writeObject(Utils.join(heads, curBranchName), c);
             saveCommit(c);
+            addCList(c.getSha1ID());
             return;
+        }
+        if (StagingArea.checkAddFileExist() && StagingArea.checkRemFileExist()) {
+            System.out.println("No changes added to the commit.");
+            System.exit(0);
         }
         c.setParent(HEAD.getShaName());
         HEAD.copyMapTo(c);
         c.updateVersion();
-        c.checkLegal();
         StagingArea.cleanStage();
         Utils.writeObject(head, c);
         Utils.writeObject(Utils.join(heads, curBranchName), c);
         //log += c.toString();
         saveCommit(c);
+        addCList(c.getSha1ID());
     }
 
     public static Commit fromFile(String SHA) {

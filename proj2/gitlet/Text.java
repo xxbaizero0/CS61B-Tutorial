@@ -1,3 +1,5 @@
+package gitlet;
+
 import gitlet.*;
 
 import java.io.File;
@@ -30,21 +32,43 @@ public class Text {
             }
         }
     }
+    private static void add(String name) {
+        Main.main(new String[]{"add", name});
+    }
+    private static void log() {
+        Main.main(new String[]{"log"});
+    }
+    private static void glog() {
+        Main.main(new String[]{"global-log"});
+    }
+
+    private static void rm(String name) {
+        Main.main(new String[]{"rm", name});
+    }
+
+    private static void commit(String name) {
+        Main.main(new String[]{"commit", name});
+    }
+
+    private static void status() {
+        Main.main(new String[]{"status"});
+    }
 
 
     public static void test1() {
         Main.main(init);
-        creatNewFile("f.txt");
-        creatNewFile("g.txt");
-        creatNewFile("h.txt");
-        Main.main(add);
-        Main.main(status);
-//
-        Main.main(commit);
-        Main.main(status);
-        Main.main(check);
+        add("hello.txt");
+        commit("Tow files");
+        glog();
 
-        Main.main(log);
+//        Main.main(add);
+//        Main.main(status);
+//
+//        Main.main(commit);
+//        Main.main(status);
+//        Main.main(check);
+//
+//        Main.main(log);
     }
 
     private static void test2() {

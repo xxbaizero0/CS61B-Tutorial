@@ -13,12 +13,11 @@ public class StagingArea {
 
     public static File indexFold = Utils.join(Repository.GITLET_DIR, "object");//folder
 
-    public static List<String> blobs = new ArrayList<>();
-
     public static HashMap<String, String> additionStage = new HashMap<>();
     public static HashMap<String, String> removalStage = new HashMap<>();
     public static File additionStageFile = Utils.join(Repository.GITLET_DIR, "additionStage");//file
     public static File removalStageFile = Utils.join(Repository.GITLET_DIR, "removalStage"); //file
+
 
 
     public static void init() {
@@ -33,7 +32,7 @@ public class StagingArea {
 
     @SuppressWarnings("unchecked")
     public static void readAddStage() {
-        if (Utils.readContentsAsString(additionStageFile).isEmpty()) {
+        if (checkAddFileExist()) {
             return;
         }
         additionStage = (HashMap<String, String>) Utils.readObject(additionStageFile, HashMap.class);
@@ -41,7 +40,7 @@ public class StagingArea {
 
     @SuppressWarnings("unchecked")
     public static void readRmStage() {
-        if (Utils.readContentsAsString(removalStageFile).isEmpty()) {
+        if (checkRemFileExist()) {
             return;
         }
         removalStage = (HashMap<String, String>) Utils.readObject(removalStageFile, HashMap.class);
@@ -52,14 +51,23 @@ public class StagingArea {
         /*
          */
         readAddStage();
+        readRmStage();
+        CommitTree.readHEAD();
         File addFile = findAddFile(name);
         if (addFile == null) {
             System.out.println("File does not exist.");
             System.exit(0);
         }
         Blobs blob = new Blobs(name, addFile);
-        blobs.add(blob.getFileName());
         saveBlobs(blob);
+        if (blob.getSha1ID().equals(CommitTree.HEAD.getFlieVersion(name))) {
+            // the situation of had add in Head Commit;
+            return;
+        }
+        if (removalStage.containsKey(name)) {
+            cleanRemStage();
+            return;
+        }
         additionStage.put(name, blob.getSha1ID());
         saveAddStage();
     }
@@ -70,8 +78,7 @@ public class StagingArea {
         if (additionStage.containsKey(name)) {
             additionStage.remove(name);
             saveAddStage();
-        }
-        if (CommitTree.HEAD.IfVersionContain(name)) {
+        }else if (CommitTree.HEAD.IfVersionContain(name)) {
             String rmID = CommitTree.HEAD.getFlieVersion(name);
             removalStage.put(name, rmID);
             saveRmStage();
@@ -86,11 +93,20 @@ public class StagingArea {
     }
 
     public static void cleanStage() {
-        additionStage.clear();
+        cleanAddStage();
+        cleanRemStage();
+    }
+
+    public static void cleanRemStage() {
         removalStage.clear();
         saveRmStage();
+    }
+
+    public static void cleanAddStage() {
+        additionStage.clear();
         saveAddStage();
     }
+
     @SuppressWarnings("unchecked")
     public static boolean checkAddEmpty() {
         additionStage = (HashMap<String, String>) Utils.readObject(additionStageFile, HashMap.class);
@@ -164,6 +180,14 @@ public class StagingArea {
     public static String getRevStage(String name) {
         readRmStage();
         return removalStage.get(name);
+    }
+
+    public static boolean checkAddFileExist() {
+        return Utils.readContentsAsString(additionStageFile).isEmpty();
+    }
+
+    public static boolean checkRemFileExist() {
+        return Utils.readContentsAsString(removalStageFile).isEmpty();
     }
 }
 

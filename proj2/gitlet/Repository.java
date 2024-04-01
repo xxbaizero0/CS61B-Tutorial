@@ -41,6 +41,14 @@ public class Repository {
         StagingArea.indexFold.mkdir();
         CommitTree.refs.mkdir();
         CommitTree.heads.mkdir();
+        try {
+            CommitTree.master.createNewFile();
+            CommitTree.head.createNewFile();
+            CommitTree.CURBranch.createNewFile();
+            CommitTree.commitList.createNewFile();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         init();
         StagingArea.init();
         CommitTree.init();
@@ -85,37 +93,35 @@ public class Repository {
 
     public static void getGlobalLog() {
         StringBuilder log = new StringBuilder();
-        List<String> commitList = getComitList();
-        for (String com : commitList) {
-            log.append(CommitTree.fromFile(com).toString());
+        List<Commit> commitList = getComitList();
+        for (Commit com : commitList) {
+            log.append(com.toString());
         }
-        System.out.println(log.toString());
+        System.out.println(log);
     }
 
-    private static List<String> getComitList() {
-        List<String> FileList = Utils.plainFilenamesIn(CommitTree.indexFold);
-        List<String> commitList = new ArrayList<>();
-        if (FileList != null) {
-            for (String com : FileList) {
-                if (!StagingArea.blobs.contains(com)) {
-                    commitList.add(com);
-                }
-            }
+    private static List<Commit> getComitList() {
+        CommitTree.readCList();
+        Set<String> cSet = CommitTree.cList.keySet();
+        List<Commit> commitList = new ArrayList<>();
+        for (String name : cSet) {
+            commitList.add(CommitTree.getClist(name));
         }
         return commitList;
     }
 
     public static void find(String arg) {
         StringBuilder findResult = new StringBuilder();
-        List<String> commitList = getComitList();
-        for (String com : commitList) {
-            Commit c = CommitTree.fromFile(com);
+        List<Commit> commitList = getComitList();
+        for (Commit c : commitList) {
             if (c.getMessage().equals(arg)) {
                 findResult.append(c.getSha1ID());
                 findResult.append('\n');
             }
         }
-        System.out.println(findResult.toString());
+        System.out.println(findResult);
+
+        //Found no commit with that message.
     }
 
     public static void status() {

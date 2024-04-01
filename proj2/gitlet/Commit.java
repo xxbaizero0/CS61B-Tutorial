@@ -59,16 +59,20 @@ public class Commit implements Serializable {
         this.version = new HashMap<>();
     }
 
-    public void checkLegal() {
-        if (this.message.isEmpty()) {
-            System.out.println("Please enter a commit message.");
-            System.exit(0);
-        }
-        if (StagingArea.checkAddEmpty() && this.parentID != null) {
-            System.out.println("No changes added to the commit.");
-            System.exit(0);
-        }
+    public boolean checkVersionEmpty() {
+        return version.isEmpty();
     }
+
+//    public void checkLegal() {
+//        if (this.message.isEmpty()) {
+//            System.out.println("Please enter a commit message.");
+//            System.exit(0);
+//        }
+//        if (StagingArea.checkAddFileExist() && StagingArea.checkRemFileExist() && this.parentID != null) {
+//            System.out.println("No changes added to the commit.");
+//            System.exit(0);
+//        }
+//    }
 
     public void updateVersion() {
         if (version.isEmpty()) {

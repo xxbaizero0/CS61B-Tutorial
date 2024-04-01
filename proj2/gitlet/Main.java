@@ -30,6 +30,10 @@ public class Main {
             // TODO: FILL THE REST IN
             case "commit":
                 Repository.checkIfInitialized();
+                if (args.length < 2) {
+                    System.out.println("Please enter a commit message.");
+                    System.exit(0);
+                }
                 validArgs(args, 2);
                 Repository.commit(args[1]);
                 break;

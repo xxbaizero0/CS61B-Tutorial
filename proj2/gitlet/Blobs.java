@@ -18,9 +18,13 @@ public class Blobs implements Serializable {
     public Blobs(String name, File file) {
         this.fileName = name;
         this.file = file;
-        this.sha1ID = Utils.sha1(Utils.readContentsAsString(file), name);
+        this.sha1ID = makeID(name, file);
         this.aByte = readFile();
         // `this` take the place of Utils.readContentsAsString(file)
+    }
+
+    public String makeID(String name, File file) {
+        return Utils.sha1(Utils.readContentsAsString(file), name);
     }
 
     public File getFile() {
