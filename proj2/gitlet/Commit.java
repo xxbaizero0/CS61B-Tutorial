@@ -1,9 +1,10 @@
 package gitlet;
 
 // TODO: any imports you need here
-
+import java.util.Date;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import java.util.*;
 
 /** Represents a gitlet commit object.
@@ -27,7 +28,7 @@ public class Commit implements Serializable {
     private String timestamp;
     private String shaName;
 
-    public HashMap<String, String> version = new HashMap<String, String>();
+    public HashMap<String, String> version;
 
     /*
     personal perspective is that we firstly creat a commit containing message and timestamp, and then when we
@@ -39,6 +40,7 @@ public class Commit implements Serializable {
         this.message = message;
         this.timestamp = formatDate(true);
         this.shaName = getSha1ID();
+        this.version = new HashMap<>();
     }
 
     public String getFlieVersion(String name) {
@@ -54,6 +56,7 @@ public class Commit implements Serializable {
         this.parentID = null;
         this.timestamp = formatDate(false);
         this.shaName = getSha1ID();
+        this.version = new HashMap<>();
     }
 
     public void checkLegal() {
@@ -61,17 +64,25 @@ public class Commit implements Serializable {
             System.out.println("Please enter a commit message.");
             System.exit(0);
         }
-        if (StagingArea.additionStage.isEmpty() && this.parentID != null) {
+        if (StagingArea.checkAddEmpty() && this.parentID != null) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
         }
     }
 
     public void updateVersion() {
+        if (version.isEmpty()) {
+            version.putAll(StagingArea.additionStage);
+            Set<String> rmList = StagingArea.removalStage.keySet();
+            for (String rmFile : rmList) {
+                version.remove(rmFile);
+            }
+            return;
+        }
         for (String na : version.keySet()) {
             String preVersion = version.get(na);
-            String curVersion = StagingArea.additionStage.get(na);
-            String rmVersion = StagingArea.removalStage.get(na);
+            String curVersion = StagingArea.getAddStage(na);
+            String rmVersion = StagingArea.getRevStage(na);
             if (!preVersion.equals(curVersion)) {
                 version.put(na, curVersion);
             }
@@ -108,6 +119,7 @@ public class Commit implements Serializable {
             sb.append(" ").append(par2.getSha1ID(), 0, 7);
         }
         sb.append("\n");
+        sb.append("\n");
         return sb.toString();
     }
 
@@ -135,10 +147,15 @@ public class Commit implements Serializable {
         return shaName;
     }
 
+    public boolean IfVersionContain(String name) {
+        return version.containsKey(name);
+    }
+
     private String formatDate(boolean isCurrentTime) {
         long millis = isCurrentTime ? System.currentTimeMillis() : 0L;
         Date currentDate = new Date(millis);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss zzz, EEEE, d MMMM yyyy", Locale.ENGLISH);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy Z", Locale.ENGLISH);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT-8"));
         return dateFormat.format(currentDate);
     }
     /* TODO: fill in the rest of this class. */

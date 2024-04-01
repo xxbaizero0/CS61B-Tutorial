@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
@@ -43,10 +44,16 @@ public class CommitTree {
         HEAD = Utils.readObject(head, Commit.class);
     }
 
+    public static Commit getHEAD() {
+        return Utils.readObject(head, Commit.class);
+    }
+
     public static String getLog(Commit commit) {
         if (commit.getParent() == null) {
             logSB.append(commit);
+            logSB.delete(logSB.length() - 2, logSB.length());
             String log1 = logSB.toString();
+
             logSB = new StringBuilder();
             return log1;
         }
@@ -55,22 +62,21 @@ public class CommitTree {
     }
 
     public static void addCommit(Commit c) {
-        if (HEAD != null) {
-            readHEAD();
-            readCurBranch();
-            c.setParent(HEAD.getShaName());
-            HEAD.copyMapTo(c);
-        }
+        // During the init time, the CT and SA have not yet init;
         if (HEAD == null) {
             curBranchName = "Master";
+            Utils.writeObject(head, c);
+            Utils.writeObject(Utils.join(heads, curBranchName), c);
+            saveCommit(c);
+            return;
         }
-        HEAD = c;
-        curBranch = c;
-        Utils.writeObject(head, HEAD);
-        Utils.writeObject(Utils.join(heads, curBranchName), curBranch);
+        c.setParent(HEAD.getShaName());
+        HEAD.copyMapTo(c);
         c.updateVersion();
         c.checkLegal();
         StagingArea.cleanStage();
+        Utils.writeObject(head, c);
+        Utils.writeObject(Utils.join(heads, curBranchName), c);
         //log += c.toString();
         saveCommit(c);
     }
@@ -161,8 +167,7 @@ public class CommitTree {
 
     public static void checkout(String name) {
         // provide a filename and put i in the CWD
-        readHEAD();
-        String storedFile = HEAD.getFlieVersion(name);
+        String storedFile = getHEAD().getFlieVersion(name);
         checkoutHelper(name, storedFile);
     }
 
@@ -192,7 +197,10 @@ public class CommitTree {
             }
         }
         try {
-            Utils.join(Repository.CWD, name).createNewFile();
+            File newFile = Utils.join(Repository.CWD, name);
+            newFile.createNewFile();
+            byte[] bytes = fileBlob.getaByte();
+            Utils.writeContents(newFile, bytes);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -205,7 +213,6 @@ public class CommitTree {
         }
         Commit branch = readBranch(Branch);
         Set<String> branchVersion = branch.getVersion().keySet();
-        readHEAD();
         Set<String> headVersion = branch.getVersion().keySet();
         for (String file : branchVersion) {
             if (headVersion.contains(file)) {

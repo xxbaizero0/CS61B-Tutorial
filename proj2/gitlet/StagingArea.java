@@ -36,10 +36,7 @@ public class StagingArea {
         if (Utils.readContentsAsString(additionStageFile).isEmpty()) {
             return;
         }
-        HashMap additionalStageObj = Utils.readObject(additionStageFile, HashMap.class);
-        if (additionalStageObj != null) {
-            additionStage = (HashMap<String, String>) additionalStageObj;
-        }
+        additionStage = (HashMap<String, String>) Utils.readObject(additionStageFile, HashMap.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -47,19 +44,14 @@ public class StagingArea {
         if (Utils.readContentsAsString(removalStageFile).isEmpty()) {
             return;
         }
-        HashMap removalStageObj = Utils.readObject(removalStageFile, HashMap.class);
-        if (removalStageObj != null) {
-            removalStage = (HashMap<String, String>)removalStageObj;
-        }
+        removalStage = (HashMap<String, String>) Utils.readObject(removalStageFile, HashMap.class);
     }
     public static void add(String name) {
         //TODO:Serialize the file added and then store in the StagingArea
         //TODO:How to get the file of the name?
         /*
          */
-        if (!Utils.readContentsAsString(additionStageFile).isEmpty()) {
-            readAddStage();
-        }
+        readAddStage();
         File addFile = findAddFile(name);
         if (addFile == null) {
             System.out.println("File does not exist.");
@@ -67,23 +59,22 @@ public class StagingArea {
         }
         Blobs blob = new Blobs(name, addFile);
         blobs.add(blob.getFileName());
-        saveAddStage();
         saveBlobs(blob);
         additionStage.put(name, blob.getSha1ID());
+        saveAddStage();
     }
 
     public static void rm(String name) {
-        if (!Utils.readContentsAsString(removalStageFile).isEmpty()) {
-            readRmStage();
-        }
+        File file = Utils.join(CWD, name);
         //TODO: if add, cancel
         if (additionStage.containsKey(name)) {
             additionStage.remove(name);
-        } else if (CommitTree.HEAD.version.containsKey(name)) {
-            String rmID = additionStage.get(name);
+            saveAddStage();
+        }
+        if (CommitTree.HEAD.IfVersionContain(name)) {
+            String rmID = CommitTree.HEAD.getFlieVersion(name);
             removalStage.put(name, rmID);
             saveRmStage();
-            File file = Utils.join(CWD, name);
             if (file.exists()) {
                 file.delete();
             }
@@ -97,6 +88,19 @@ public class StagingArea {
     public static void cleanStage() {
         additionStage.clear();
         removalStage.clear();
+        saveRmStage();
+        saveAddStage();
+    }
+    @SuppressWarnings("unchecked")
+    public static boolean checkAddEmpty() {
+        additionStage = (HashMap<String, String>) Utils.readObject(additionStageFile, HashMap.class);
+        return additionStage.isEmpty();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static boolean checkRemEmpty() {
+        removalStage = (HashMap<String, String>) Utils.readObject(removalStageFile, HashMap.class);
+        return removalStage.isEmpty();
     }
 
     public static Blobs fromFile(String SHA) {
@@ -144,12 +148,22 @@ public class StagingArea {
         return null;
     }
 
-    private static void saveAddStage() {
+    public static void saveAddStage() {
         Utils.writeObject(additionStageFile, additionStage);
     }
 
-    private static void saveRmStage() {
+    public static void saveRmStage() {
         Utils.writeObject(removalStageFile, removalStage);
+    }
+
+    public static String getAddStage(String name) {
+        readAddStage();
+        return additionStage.get(name);
+    }
+
+    public static String getRevStage(String name) {
+        readRmStage();
+        return removalStage.get(name);
     }
 }
 

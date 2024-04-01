@@ -36,10 +36,7 @@ public class Repository {
 
     /* TODO: fill in the rest of this class. */
     public static void initCommand() {
-        if (GITLET_DIR.exists()) {
-            System.out.println("A Gitlet version-control system already exists in the current directory.");
-            System.exit(0);;
-        }
+        checkIfSystemExists();
         GITLET_DIR.mkdir();
         StagingArea.indexFold.mkdir();
         CommitTree.refs.mkdir();
@@ -48,6 +45,22 @@ public class Repository {
         StagingArea.init();
         CommitTree.init();
     }
+
+    public static void checkIfSystemExists() {
+        if (GITLET_DIR.exists()) {
+            System.out.println("A Gitlet version-control system already exists in the current directory.");
+            System.exit(0);;
+        }
+    }
+
+    public static void checkIfInitialized() {
+        if (!GITLET_DIR.exists()) {
+            System.out.println("Not in an initialized Gitlet directory.");
+            System.exit(0);
+        }
+    }
+
+
 
     private static void init() {
         Commit initialCommit = new Commit();
@@ -58,10 +71,15 @@ public class Repository {
 
     public static void commit(String message) {
         Commit commit = new Commit(message);
+        CommitTree.readHEAD();
+        CommitTree.readCurBranch();
+        StagingArea.readRmStage();
+        StagingArea.readAddStage();
         CommitTree.addCommit(commit);
     }
 
     public static void getLog() {
+        CommitTree.readHEAD();
         System.out.println(CommitTree.getLog(CommitTree.HEAD));
     }
 
@@ -101,6 +119,8 @@ public class Repository {
     }
 
     public static void status() {
+        StagingArea.readRmStage();
+        StagingArea.readAddStage();
         printBranches();
         printStagedFile();
         printRemovedFiles();
@@ -132,6 +152,9 @@ public class Repository {
     }
 
     public static void rm(String arg) {
+        CommitTree.readHEAD();
+        StagingArea.readRmStage();
+        StagingArea.readAddStage();
         StagingArea.rm(arg);
     }
 
@@ -152,7 +175,6 @@ public class Repository {
 
     private static void printStagedFile() {
         System.out.println("=== Staged Files ===");
-        StagingArea.readAddStage();
         Set<String> addStage = StagingArea.additionStage.keySet();
         for (String b : addStage) {
             System.out.println(b);
@@ -162,7 +184,6 @@ public class Repository {
 
     private static void printRemovedFiles() {
         System.out.println("=== Removed Files ===");
-        StagingArea.readRmStage();
         Set<String> removeStage = StagingArea.removalStage.keySet();
         for (String b : removeStage) {
             System.out.println(b);
@@ -178,5 +199,11 @@ public class Repository {
     private static void printUntrackedFiles() {
         System.out.println("=== Untracked Files ===");
         System.out.println();
+    }
+
+    public static void reset(String commitId) {
+    }
+
+    public static void merge(String branch) {
     }
 }
