@@ -60,12 +60,12 @@ public class StagingArea {
         }
         Blobs blob = new Blobs(name, addFile);
         saveBlobs(blob);
-        if (removalStage.containsKey(name)) {
-            cleanRemStage();
-            return;
-        }
         if (blob.getSha1ID().equals(CommitTree.HEAD.getFlieVersion(name))) {
             // the situation of had add in Head Commit;
+            return;
+        }
+        if (removalStage.containsKey(name)) {
+            cleanRemStage();
             return;
         }
         additionStage.put(name, blob.getSha1ID());
