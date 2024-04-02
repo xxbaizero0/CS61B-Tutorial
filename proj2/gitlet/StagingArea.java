@@ -60,12 +60,12 @@ public class StagingArea {
         }
         Blobs blob = new Blobs(name, addFile);
         saveBlobs(blob);
-        if (blob.getSha1ID().equals(CommitTree.HEAD.getFlieVersion(name))) {
-            // the situation of had add in Head Commit;
-            return;
-        }
         if (removalStage.containsKey(name)) {
             cleanRemStage();
+            return;
+        }
+        if (blob.getSha1ID().equals(CommitTree.HEAD.getFlieVersion(name))) {
+            // the situation of had add in Head Commit;
             return;
         }
         additionStage.put(name, blob.getSha1ID());
@@ -134,21 +134,7 @@ public class StagingArea {
 
     private static void saveBlobs(Blobs blob) {
         String blobSha = blob.getSha1ID();
-        String blobSha2 = blobSha.substring(0,2);
-        String fileName = blobSha.substring(2);
-        File storeFile = Utils.join(indexFold, blobSha2, fileName);
-        File storeFileFold = Utils.join(indexFold, blobSha2);
-        try {
-            if (!storeFileFold.exists()) {
-                storeFileFold.mkdir();
-            }
-            if (!storeFile.exists()) {
-                storeFile.createNewFile();
-            }
-            Utils.writeObject(storeFile, blob);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Repository.storeInObjectFile(blobSha, blob);
     }
 
 

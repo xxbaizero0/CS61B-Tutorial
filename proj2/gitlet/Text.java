@@ -42,6 +42,8 @@ public class Text {
         Main.main(new String[]{"global-log"});
     }
 
+
+
     private static void rm(String name) {
         Main.main(new String[]{"rm", name});
     }
@@ -50,20 +52,25 @@ public class Text {
         Main.main(new String[]{"commit", name});
     }
 
+    private static void find(String name) {
+        Main.main(new String[]{"find", name});
+    }
+
     private static void status() {
         Main.main(new String[]{"status"});
     }
 
 
     public static void test1() {
-        //Main.main(init);
-        //add("hello.txt");
-        //commit("1 files");
-//        add("hello2.txt");
-//        commit("2");
-        //add("hello3.txt");
-        //commit("3");
-        //glog();
+        Main.main(init);
+        add("hello.txt");
+        commit("1");
+        add("hello2.txt");
+        commit("1");
+        add("hello3.txt");
+        commit("3");
+        find("1");
+        log();
 
 //        Main.main(add);
 //        Main.main(status);
@@ -80,8 +87,7 @@ public class Text {
     }
 
     public static void main(String[] args) {
-//        test1();
-        glog();
+        test1();
         //test2();
         //Main.main(rm);
     }

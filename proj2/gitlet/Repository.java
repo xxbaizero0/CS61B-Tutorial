@@ -1,6 +1,7 @@
 package gitlet;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -77,12 +78,32 @@ public class Repository {
 //        Utils.writeObject(initialCommitFile, initialCommit);
     }
 
+    public static void storeInObjectFile(String cSha, Serializable stored) {
+        String commitSha2 = cSha.substring(0,2);
+        String fileName = cSha.substring(2);
+
+        File storeFile = Utils.join(StagingArea.indexFold, commitSha2, fileName);
+        File storeFileFold = Utils.join(StagingArea.indexFold, commitSha2);
+        try {
+            if (!storeFileFold.exists()) {
+                storeFileFold.mkdir();
+            }
+            if (!storeFile.exists()) {
+                storeFile.createNewFile();
+            }
+            Utils.writeObject(storeFile, stored);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void commit(String message) {
         Commit commit = new Commit(message);
         CommitTree.readHEAD();
         CommitTree.readCurBranch();
         StagingArea.readRmStage();
         StagingArea.readAddStage();
+        CommitTree.readCList();
         CommitTree.addCommit(commit);
     }
 
@@ -96,10 +117,9 @@ public class Repository {
         List<Commit> commitList = getComitList();
         for (Commit com : commitList) {
             log.insert(0, com.toString());
-            //log.append(com.toString());
         }
         log.delete(log.length() - 2, log.length());
-        System.out.print(log);
+        System.out.println(log);
     }
 
     private static List<Commit> getComitList() {
@@ -116,10 +136,15 @@ public class Repository {
         List<Commit> commitList = getComitList();
         for (Commit c : commitList) {
             if (c.getMessage().equals(arg)) {
-                findResult.append(c.getSha1ID());
+                findResult.append(c.getShaName());
                 findResult.append('\n');
             }
         }
+        if (findResult.toString().isEmpty()) {
+            System.out.println("Found no commit with that message.");
+            System.exit(0);
+        }
+        findResult.delete(findResult.length() - 1, findResult.length());
         System.out.println(findResult);
 
         //Found no commit with that message.

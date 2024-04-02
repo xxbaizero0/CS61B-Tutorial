@@ -39,7 +39,6 @@ public class Commit implements Serializable {
     public Commit(String message) {
         this.message = message;
         this.timestamp = formatDate(true);
-        this.shaName = getSha1ID();
         this.version = new HashMap<>();
     }
 
@@ -57,6 +56,10 @@ public class Commit implements Serializable {
         this.timestamp = formatDate(false);
         this.shaName = getSha1ID();
         this.version = new HashMap<>();
+    }
+
+    public void setShaName() {
+        this.shaName = getSha1ID();
     }
 
     public boolean checkVersionEmpty() {
@@ -87,7 +90,7 @@ public class Commit implements Serializable {
             String preVersion = version.get(na);
             String curVersion = StagingArea.getAddStage(na);
             String rmVersion = StagingArea.getRevStage(na);
-            if (!preVersion.equals(curVersion)) {
+            if (preVersion != null && !preVersion.equals(curVersion)) {
                 version.put(na, curVersion);
             }
             version.remove(rmVersion);
@@ -103,7 +106,10 @@ public class Commit implements Serializable {
         this.version = version;
     }
 
-    public String getSha1ID() {
+    private String getSha1ID() {
+        if (parentID != null && version !=null) {
+            return Utils.sha1(formatDate(true), message, parentID.toString(), version.toString());
+        }
         return Utils.sha1(formatDate(true), message);
     }
 

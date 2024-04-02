@@ -29,10 +29,6 @@ public class CommitTree {
 
     public static void addCList(String name) {
         cList.add(name);
-        savaCList();
-    }
-
-    public static void savaCList() {
         Utils.writeObject(commitList, (Serializable) cList);
     }
 
@@ -63,8 +59,9 @@ public class CommitTree {
     public static String getLog(Commit commit) {
         if (commit.getParent() == null) {
             logSB.append(commit);
-            logSB.delete(logSB.length() - 1, logSB.length());
+            logSB.delete(logSB.length() - 2, logSB.length());
             String log1 = logSB.toString();
+
             logSB = new StringBuilder();
             return log1;
         }
@@ -79,7 +76,7 @@ public class CommitTree {
             Utils.writeObject(head, c);
             Utils.writeObject(Utils.join(heads, curBranchName), c);
             saveCommit(c);
-            addCList(c.getSha1ID());
+            addCList(c.getShaName());
             return;
         }
         if (StagingArea.checkAddFileExist() && StagingArea.checkRemFileExist()) {
@@ -88,13 +85,14 @@ public class CommitTree {
         }
         c.setParent(HEAD.getShaName());
         HEAD.copyMapTo(c);
+        c.setShaName();
         c.updateVersion();
         StagingArea.cleanStage();
         Utils.writeObject(head, c);
         Utils.writeObject(Utils.join(heads, curBranchName), c);
         //log += c.toString();
         saveCommit(c);
-        addCList(c.getSha1ID());
+        addCList(c.getShaName());
     }
 
     public static Commit fromFile(String SHA) {
@@ -109,23 +107,8 @@ public class CommitTree {
     }
 
     private static void saveCommit(Commit commit) {
-        String cSha = commit.getSha1ID();
-        String commitSha2 = cSha.substring(0,2);
-        String fileName = cSha.substring(2);
-
-        File storeFile = Utils.join(indexFold, commitSha2, fileName);
-        File storeFileFold = Utils.join(indexFold, commitSha2);
-        try {
-            if (!storeFileFold.exists()) {
-                storeFileFold.mkdir();
-            }
-            if (!storeFile.exists()) {
-                storeFile.createNewFile();
-            }
-            Utils.writeObject(storeFile, commit);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String cSha = commit.getShaName();
+        Repository.storeInObjectFile(cSha, commit);
     }
 
     public static void setCurBranch(String name) {
