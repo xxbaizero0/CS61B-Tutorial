@@ -179,6 +179,7 @@ public class Repository {
     }
 
     public static void rmBranch(String arg) {
+        CommitTree.readHEAD();
         CommitTree.rmBranch(arg);
     }
 

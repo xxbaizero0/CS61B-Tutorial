@@ -156,11 +156,13 @@ public class CommitTree {
         for (String h : headList) {
             if (h.equals(name)) {
                 File b = Utils.join(heads, h);
-                if (Utils.readObject(b, Commit.class).equals(HEAD)) {
+                Commit c = Utils.readObject(b, Commit.class);
+                if (c.getShaName().equals(HEAD.getShaName())) {
                     System.out.println("Cannot remove the current branch.");
                     System.exit(0);
                 }
                 b.delete();
+                return;
             }
         }
         System.out.println("A branch with that name does not exist.");
@@ -218,6 +220,7 @@ public class CommitTree {
         overwriteFile(branch);
         writerFile(branch);
         setCurBranch(Branch);
+        Utils.writeObject(head, branch);
     }
 
     private static void deleteNoExistFile(Commit branch) {
@@ -231,8 +234,13 @@ public class CommitTree {
     private static void writerFile(Commit branch) {
         //TODO: get noExistInCurBranchFIle;
         List<String> files = getCompareFile(branch, WRITE);
+        List<String> CWDFile = Utils.plainFilenamesIn(Repository.CWD);
         for (String file : files) {
-            writerNewFile(branch, file, WRITE);
+            if (CWDFile != null && CWDFile.contains(file)) {
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.exit(0);
+            }
+            writerNewFile(branch, file);
         }
     }
 
@@ -240,24 +248,17 @@ public class CommitTree {
         List<String> files = getCompareFile(branch, OVER);
         for (String file : files) {
             Utils.join(Repository.CWD, file).delete();
-            writerNewFile(branch, file, OVER);
+            writerNewFile(branch, file);
         }
     }
 
-    private static void writerNewFile(Commit branch, String file, String command) {
+    private static void writerNewFile(Commit branch, String file) {
         // this method is creat file in CWD.
         try {
             File newFile = Utils.join(Repository.CWD, file);
             newFile.createNewFile();
             String filePath = new String();
-            switch (command) {
-                case OVER:
-                    filePath = branch.getFlieVersion(file);
-                    break;
-                case WRITE:
-                    filePath = HEAD.getFlieVersion(file);
-                    break;
-            }
+            filePath = branch.getFlieVersion(file);
             Blobs newBlobs = StagingArea.fromFile(filePath);
             byte[] bytes = newBlobs.getaByte();
             Utils.writeContents(newFile, bytes);
@@ -280,40 +281,40 @@ public class CommitTree {
     private static List<String> getCompareFile(Commit branch,String command) {
         Set<String> branchVersion = branch.getVersion().keySet();
         Set<String> headVersion = HEAD.getVersion().keySet();
-        List<String> CWDFile = Utils.plainFilenamesIn(Repository.CWD);
         List<String> noExistInCurBranchFile = new ArrayList<>();
         List<String> ExistBothBranchFile = new ArrayList<>();
         List<String> noExistInMasterBranchFile = new ArrayList<>();
-        if (CWDFile != null) {
-            for (String file : CWDFile) {
-                switch (command) {
-                    case DELETE:
-                        if (!branchVersion.contains(file) && headVersion.contains(file)) {
-                            noExistInCurBranchFile.add(file);
-                        }
-                        break;
-                    case OVER:
-                        if (branchVersion.contains(file) && headVersion.contains(file)) {
-                            ExistBothBranchFile.add(file);
-                        }
-                        break;
-                    case WRITE:
-                        if (branchVersion.contains(file) && !headVersion.contains(file)) {
-                            noExistInMasterBranchFile.add(file);
-                        }
-                        break;
+        switch (command) {
+            case DELETE:
+                for (String file : headVersion) {
+                    if (!branchVersion.contains(file) && headVersion.contains(file)) {
+                        noExistInCurBranchFile.add(file);
+                    }
                 }
-
-            }
-            switch (command) {
-                case DELETE:
-                    return noExistInCurBranchFile;
-                case OVER:
-                    return ExistBothBranchFile;
-                case WRITE:
-                    return noExistInMasterBranchFile;
-            }
+                break;
+            case OVER:
+                for (String file : headVersion) {
+                    if (branchVersion.contains(file) && headVersion.contains(file)) {
+                        ExistBothBranchFile.add(file);
+                    }
+                }
+                break;
+            case WRITE:
+                for (String file : branchVersion) {
+                    if (branchVersion.contains(file) && !headVersion.contains(file)) {
+                        noExistInMasterBranchFile.add(file);
+                    }
+                }
+                break;
         }
-        return CWDFile;
+        switch (command) {
+            case DELETE:
+                return noExistInCurBranchFile;
+            case OVER:
+                return ExistBothBranchFile;
+            case WRITE:
+                return noExistInMasterBranchFile;
+        }
+        return null;
     }
 }

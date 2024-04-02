@@ -106,8 +106,6 @@ public class Text {
         //Main.main(rm);
     }
 
-
-
     public static void deleteFolder(File folder) {
         if (folder.isDirectory()) {
             File[] files = folder.listFiles();
