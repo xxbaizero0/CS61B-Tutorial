@@ -122,7 +122,7 @@ public class Repository {
         System.out.println(log);
     }
 
-    private static List<Commit> getComitList() {
+    public static List<Commit> getComitList() {
         CommitTree.readCList();
         List<Commit> commitList = new ArrayList<>();
         for (String name : CommitTree.cList) {
@@ -234,6 +234,11 @@ public class Repository {
     }
 
     public static void reset(String commitId) {
+        CommitTree.readHEAD();
+        StagingArea.readRmStage();
+        StagingArea.readAddStage();
+        CommitTree.readCurBranch();
+        CommitTree.reset(commitId);
     }
 
     public static void merge(String branch) {

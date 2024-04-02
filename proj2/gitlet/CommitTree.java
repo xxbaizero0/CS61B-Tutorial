@@ -232,7 +232,7 @@ public class CommitTree {
     }
 
     private static void writerFile(Commit branch) {
-        //TODO: get noExistInCurBranchFIle;
+        //TODO: get InCurBranchFIleButHead;
         List<String> files = getCompareFile(branch, WRITE);
         List<String> CWDFile = Utils.plainFilenamesIn(Repository.CWD);
         for (String file : files) {
@@ -316,5 +316,24 @@ public class CommitTree {
                 return noExistInMasterBranchFile;
         }
         return null;
+    }
+    private static void checkIDExist(String commitId) {
+        List<Commit> commitList = Repository.getComitList();
+        for (Commit c : commitList) {
+            if (c.getShaName().equals(commitId)) {
+                return;
+            }
+        }
+        System.out.println("No commit with that id exists.");
+        System.exit(0);
+    }
+    public static void reset(String commitId) {
+        checkIDExist(commitId);
+        Commit commit = fromFile(commitId);
+        deleteNoExistFile(commit);
+        StagingArea.cleanAddStage();
+        writerFile(commit);
+        Utils.writeObject(head, commit);
+        Utils.writeObject(Utils.join(heads, curBranchName), commit);
     }
 }
