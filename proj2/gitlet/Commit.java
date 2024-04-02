@@ -79,7 +79,7 @@ public class Commit implements Serializable {
 
     public void updateVersion() {
         if (version.isEmpty()) {
-            version.putAll(StagingArea.additionStage);
+            addToVersion();
             Set<String> rmList = StagingArea.removalStage.keySet();
             for (String rmFile : rmList) {
                 version.remove(rmFile);
@@ -90,13 +90,22 @@ public class Commit implements Serializable {
             String preVersion = version.get(na);
             String curVersion = StagingArea.getAddStage(na);
             String rmVersion = StagingArea.getRevStage(na);
-            if (preVersion != null && !preVersion.equals(curVersion)) {
+            if (preVersion != null && !preVersion.equals(curVersion) && curVersion != null) {
                 version.put(na, curVersion);
             }
             version.remove(rmVersion);
         }
+        addToVersion();
     }
-
+    private void addToVersion() {
+        Set<String> addStage = StagingArea.additionStage.keySet();
+        for (String addition : addStage) {
+            if (!version.containsKey(addition)) {
+                String addVersion = StagingArea.getAddStage(addition);
+                version.put(addition, addVersion);
+            }
+        }
+    }
     public void copyMapTo(Commit c) {
         HashMap<String, String> copiedVersion = new HashMap<>(this.version);
         c.setVersionMap(copiedVersion);

@@ -160,8 +160,6 @@ public class Repository {
         printUntrackedFiles();
     }
 
-
-
     public static void checkout(String fileName) {
         CommitTree.checkout(fileName);
     }
@@ -171,6 +169,7 @@ public class Repository {
     }
 
     public static void checkoutBranch(String branchName) {
+        CommitTree.readHEAD();
         CommitTree.checkoutBranch(branchName);
 
     }

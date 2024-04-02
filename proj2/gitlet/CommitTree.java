@@ -1,13 +1,14 @@
 package gitlet;
-import gitlet.GitletException;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 public class CommitTree {
+    static final String OVER = "over";
+    static final String WRITE= "writer";
+    static final String DELETE = "delete";
     public static Commit HEAD;
     public static Commit Master;
 
@@ -120,6 +121,7 @@ public class CommitTree {
         curBranchName = Utils.readObject(CURBranch, String.class);
     }
 
+
     public static String readCurBranchAsString() {
         return Utils.readObject(CURBranch, String.class);
 //        List<String> bL = Utils.plainFilenamesIn(heads);
@@ -142,7 +144,8 @@ public class CommitTree {
         }
         try {
             b.createNewFile();
-            Utils.writeObject(b, head);
+            readHEAD();
+            Utils.writeObject(b, HEAD);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -211,25 +214,53 @@ public class CommitTree {
             System.exit(0);
         }
         Commit branch = readBranch(Branch);
-        Set<String> branchVersion = branch.getVersion().keySet();
-        Set<String> headVersion = branch.getVersion().keySet();
-        for (String file : branchVersion) {
-            if (headVersion.contains(file)) {
-                Utils.join(Repository.CWD, file).delete();
-                checkoutBranchHelper(file);
-            } else {
-                checkoutBranchHelper(file);
-            }
-        }
+        deleteNoExistFile(branch);
+        overwriteFile(branch);
+        writerFile(branch);
         setCurBranch(Branch);
     }
 
-    private static void checkoutBranchHelper(String file) {
+    private static void deleteNoExistFile(Commit branch) {
+        //TODO: get noExistInCurBranchFIle;
+        List<String> files = getCompareFile(branch, DELETE);
+        for (String file : files) {
+            Utils.join(Repository.CWD, file).delete();
+        }
+    }
+
+    private static void writerFile(Commit branch) {
+        //TODO: get noExistInCurBranchFIle;
+        List<String> files = getCompareFile(branch, WRITE);
+        for (String file : files) {
+            writerNewFile(branch, file, WRITE);
+        }
+    }
+
+    private static void overwriteFile(Commit branch) {
+        List<String> files = getCompareFile(branch, OVER);
+        for (String file : files) {
+            Utils.join(Repository.CWD, file).delete();
+            writerNewFile(branch, file, OVER);
+        }
+    }
+
+    private static void writerNewFile(Commit branch, String file, String command) {
+        // this method is creat file in CWD.
         try {
             File newFile = Utils.join(Repository.CWD, file);
             newFile.createNewFile();
-            Blobs newBlobs = StagingArea.fromFile(file);
-            Utils.writeObject(newFile, newBlobs.file);
+            String filePath = new String();
+            switch (command) {
+                case OVER:
+                    filePath = branch.getFlieVersion(file);
+                    break;
+                case WRITE:
+                    filePath = HEAD.getFlieVersion(file);
+                    break;
+            }
+            Blobs newBlobs = StagingArea.fromFile(filePath);
+            byte[] bytes = newBlobs.getaByte();
+            Utils.writeContents(newFile, bytes);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -237,10 +268,52 @@ public class CommitTree {
 
     private static Commit readBranch(String Branch) {
         File branch = Utils.join(heads, Branch);
+        Commit newBranch;
         if (!branch.exists()) {
             System.out.println("No such branch exists.");
             System.exit(0);
         }
-        return Utils.readObject(branch, Commit.class);
+        newBranch = Utils.readObject(branch, Commit.class);
+        return newBranch;
+    }
+
+    private static List<String> getCompareFile(Commit branch,String command) {
+        Set<String> branchVersion = branch.getVersion().keySet();
+        Set<String> headVersion = HEAD.getVersion().keySet();
+        List<String> CWDFile = Utils.plainFilenamesIn(Repository.CWD);
+        List<String> noExistInCurBranchFile = new ArrayList<>();
+        List<String> ExistBothBranchFile = new ArrayList<>();
+        List<String> noExistInMasterBranchFile = new ArrayList<>();
+        if (CWDFile != null) {
+            for (String file : CWDFile) {
+                switch (command) {
+                    case DELETE:
+                        if (!branchVersion.contains(file) && headVersion.contains(file)) {
+                            noExistInCurBranchFile.add(file);
+                        }
+                        break;
+                    case OVER:
+                        if (branchVersion.contains(file) && headVersion.contains(file)) {
+                            ExistBothBranchFile.add(file);
+                        }
+                        break;
+                    case WRITE:
+                        if (branchVersion.contains(file) && !headVersion.contains(file)) {
+                            noExistInMasterBranchFile.add(file);
+                        }
+                        break;
+                }
+
+            }
+            switch (command) {
+                case DELETE:
+                    return noExistInCurBranchFile;
+                case OVER:
+                    return ExistBothBranchFile;
+                case WRITE:
+                    return noExistInMasterBranchFile;
+            }
+        }
+        return CWDFile;
     }
 }

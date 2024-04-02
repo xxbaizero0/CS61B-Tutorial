@@ -16,10 +16,12 @@ public class Text {
     static String[] status = new String[]{"status"};
 
 
-    private static String[] branch(String name) {
+    private static void branch(String name) {
         String[] branch = new String[]{"branch", name};
-        return branch;
+        Main.main(branch);
     }
+
+
 
     private static void creatNewFile(String name) {
         File file = Repository.CWD;
@@ -42,8 +44,6 @@ public class Text {
         Main.main(new String[]{"global-log"});
     }
 
-
-
     private static void rm(String name) {
         Main.main(new String[]{"rm", name});
     }
@@ -55,23 +55,24 @@ public class Text {
     private static void find(String name) {
         Main.main(new String[]{"find", name});
     }
+    private static void check(String checkBranch) {
+        Main.main(new String[]{"checkout", checkBranch});
+    }
 
     private static void status() {
         Main.main(new String[]{"status"});
     }
 
 
-    public static void test1() {
+    public static void setup() {
+        File rep = Repository.GITLET_DIR;
+        if (rep.exists()) {
+            deleteFolder(rep);
+        }
+        creatNewFile("hello.txt");
+        creatNewFile("hello2.txt");
+        creatNewFile("hello3.txt");
         Main.main(init);
-        add("hello.txt");
-        commit("1");
-        add("hello2.txt");
-        commit("1");
-        add("hello3.txt");
-        commit("3");
-        find("1");
-        log();
-
 //        Main.main(add);
 //        Main.main(status);
 //
@@ -82,13 +83,41 @@ public class Text {
 //        Main.main(log);
     }
 
-    private static void test2() {
+    public static void test2() {
+        String branch = "new";
+        branch(branch);
+        add("hello.txt");
+        add("hello2.txt");
+        commit("2");
+        check(branch);
+        creatNewFile("hello2.txt");
+        add("hello2.txt");
+        commit("3");
+        check("master");
+    }
+
+    private static void test3() {
         Main.main(check);
     }
 
     public static void main(String[] args) {
-        test1();
-        //test2();
+        setup();
+        test2();
         //Main.main(rm);
+    }
+
+
+
+    public static void deleteFolder(File folder) {
+        if (folder.isDirectory()) {
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    deleteFolder(file);
+                }
+            }
+        }
+
+        folder.delete();
     }
 }
