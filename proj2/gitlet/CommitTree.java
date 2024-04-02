@@ -29,6 +29,10 @@ public class CommitTree {
 
     public static void addCList(String name) {
         cList.add(name);
+        savaCList();
+    }
+
+    public static void savaCList() {
         Utils.writeObject(commitList, (Serializable) cList);
     }
 
@@ -59,9 +63,8 @@ public class CommitTree {
     public static String getLog(Commit commit) {
         if (commit.getParent() == null) {
             logSB.append(commit);
-            logSB.delete(logSB.length() - 2, logSB.length());
+            logSB.delete(logSB.length() - 1, logSB.length());
             String log1 = logSB.toString();
-
             logSB = new StringBuilder();
             return log1;
         }

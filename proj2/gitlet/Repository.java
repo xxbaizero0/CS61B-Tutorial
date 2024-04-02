@@ -96,9 +96,10 @@ public class Repository {
         List<Commit> commitList = getComitList();
         for (Commit com : commitList) {
             log.insert(0, com.toString());
+            //log.append(com.toString());
         }
         log.delete(log.length() - 2, log.length());
-        System.out.println(log);
+        System.out.print(log);
     }
 
     private static List<Commit> getComitList() {

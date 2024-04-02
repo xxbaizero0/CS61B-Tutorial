@@ -56,14 +56,14 @@ public class Text {
 
 
     public static void test1() {
-        Main.main(init);
-        add("hello.txt");
-        commit("1 files");
-        add("hello2.txt");
-        commit("2");
-        add("hello3.txt");
-        commit("3");
-        glog();
+        //Main.main(init);
+        //add("hello.txt");
+        //commit("1 files");
+//        add("hello2.txt");
+//        commit("2");
+        //add("hello3.txt");
+        //commit("3");
+        //glog();
 
 //        Main.main(add);
 //        Main.main(status);
@@ -80,7 +80,8 @@ public class Text {
     }
 
     public static void main(String[] args) {
-        test1();
+//        test1();
+        glog();
         //test2();
         //Main.main(rm);
     }
