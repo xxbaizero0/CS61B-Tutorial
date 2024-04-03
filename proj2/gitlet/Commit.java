@@ -143,11 +143,11 @@ public class Commit implements Serializable {
     }
 
 
-    public String getParent() {
+    public String getParent(int n) {
         if (parentID == null) {
             return null;
         }
-        return parentID.get(0);
+        return parentID.get(n);
     }
 
     public String getMessage() {

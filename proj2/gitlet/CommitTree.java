@@ -2,6 +2,7 @@ package gitlet;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -58,7 +59,7 @@ public class CommitTree {
     }
 
     public static String getLog(Commit commit) {
-        if (commit.getParent() == null) {
+        if (commit.getParent(0) == null) {
             logSB.append(commit);
             logSB.delete(logSB.length() - 2, logSB.length());
             String log1 = logSB.toString();
@@ -67,7 +68,7 @@ public class CommitTree {
             return log1;
         }
         logSB.append(commit);
-        return getLog(fromFile(commit.getParent()));
+        return getLog(fromFile(commit.getParent(0)));
     }
 
     public static void addCommit(Commit c) {
@@ -335,5 +336,75 @@ public class CommitTree {
         writerFile(commit);
         Utils.writeObject(head, commit);
         Utils.writeObject(Utils.join(heads, curBranchName), commit);
+    }
+
+    public static void merge(String branch) {
+        Commit branchCommit = readBranch(branch);
+        Set<String> branchAncestors = new HashSet<>();
+        Set<String> masterAncestors = new HashSet<>();
+        findAncestors(branchCommit, branchAncestors);
+        findAncestors(HEAD, masterAncestors);
+        // get splitPoint
+        Commit splitPoint = findSplitPoint(masterAncestors, branchAncestors);
+        // get changSet
+        Set<String> changeFileSetOfBranch = new HashSet<>();
+        Set<String> changeFileSetOfCurBranch = new HashSet<>();
+        // get existSet
+        Set<String> existFileSetOfBranch = new HashSet<>();
+        Set<String> existFileSetOfCurBranch = new HashSet<>();
+        // error check
+        mergeErrCheck(branch);
+        // specialSituation check
+        specialSituation(splitPoint, branchCommit);
+        // normal situation
+        oneChangeOneKeep(splitPoint, branchCommit, changeFileSetOfBranch);
+        oneExistOthersNot(splitPoint, branchCommit, existFileSetOfBranch, opposeSet(existFileSetOfCurBranch));
+        MasterNotExistBranchKeep(splitPoint, branchCommit, opposeSet(existFileSetOfCurBranch), changeFileSetOfCurBranch);
+        BranchNotExistMasterKeep(splitPoint, branchCommit, opposeSet(existFileSetOfBranch), changeFileSetOfCurBranch);
+        twoChangeButSame(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch);
+        twoChangeButDiff(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch);
+    }
+
+    private static Set<String> opposeSet(Set<String> FileSet) {
+        return null;
+    }
+
+    private static void twoChangeButDiff(Commit splitPoint, Commit branchCommit, Set<String> changeFileSetOfBranch, Set<String> changeFileSetOfCurBranch) {
+    }
+
+    private static void twoChangeButSame(Commit splitPoint, Commit branchCommit, Set<String> changeFileSetOfBranch, Set<String> changeFileSetOfCurBranch) {
+    }
+
+    private static void BranchNotExistMasterKeep(Commit splitPoint, Commit branchCommit, Set<String> existFileSetOfBranch, Set<String> changeFileSetOfCurBranch) {
+    }
+
+    private static void MasterNotExistBranchKeep(Commit splitPoint, Commit branchCommit, Set<String> existFileSetOfCurBranch, Set<String> changeFileSetOfCurBranch) {
+    }
+
+    private static void oneExistOthersNot(Commit splitPoint, Commit branchCommit, Set<String> existFileSetOfBranch, Set<String> existFileSetOfCurBranch) {
+    }
+
+    private static void oneChangeOneKeep(Commit splitPoint, Commit branchCommit, Set<String> changeFileSetOfBranch) {
+    }
+
+    private static Set<String> findIfExist(Set<String> splitFileSet, Set<String> curFileSet) {
+        return null;
+    }
+
+    private static Set<String> findIfChange(Set<String> splitFileSet, Set<String> curFileSet) {
+        return null;
+    }
+
+    private static Commit findSplitPoint(Set<String> masterAncestors, Set<String> branchAncestors) {
+        return null;
+    }
+
+    private static void specialSituation(Commit splitPoint, Commit branchCommit) {
+    }
+
+    private static void mergeErrCheck(String branch) {
+    }
+
+    private static void findAncestors(Commit Commit, Set<String> branchAncestors) {
     }
 }

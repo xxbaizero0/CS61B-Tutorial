@@ -115,7 +115,6 @@ public class Text {
                 }
             }
         }
-
         folder.delete();
     }
 }

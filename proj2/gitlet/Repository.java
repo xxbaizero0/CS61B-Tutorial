@@ -242,5 +242,9 @@ public class Repository {
     }
 
     public static void merge(String branch) {
+        CommitTree.readHEAD();
+        StagingArea.readRmStage();
+        StagingArea.readAddStage();
+        CommitTree.merge(branch);
     }
 }
