@@ -503,12 +503,12 @@ public class CommitTree {
             System.out.print("Cannot merge a branch with itself.");
             System.exit(0);
         }
-//        for (String file : CWDFile) {
-//            if (CWDFile != null && !HEAD.getVersion().keySet().contains(file)) {
-//                System.out.print("There is an untracked file in the way; delete it, or add and commit it first.");
-//                System.exit(0);
-//            }
-//        }
+        for (String file : CWDFile) {
+            if (CWDFile != null && !HEAD.getVersion().keySet().contains(file)) {
+                System.out.print("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.exit(0);
+            }
+        }
     }
 
     private static Commit findSplitPoint(HashMap<String, Integer> masterAncestors, HashMap<String, Integer> branchAncestors) {
