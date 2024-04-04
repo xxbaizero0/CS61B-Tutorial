@@ -148,7 +148,6 @@ public class Text {
         add(g);
         add(f);
         commit("2");
-        branch("other");
     }
     @Test
     public void test5() {
@@ -160,7 +159,9 @@ public class Text {
         branch("b2");
         rm(f);
         commit("rm f");
-        merge("b1");
+        //merge("b1");
+        check("b2");
+        merge("master");
     }
     private static String findSplitPoint(HashMap<String, Integer> masterAncestors, HashMap<String, Integer> branchAncestors) {
         Set<String> masters = masterAncestors.keySet();

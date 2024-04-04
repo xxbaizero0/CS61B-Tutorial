@@ -476,11 +476,11 @@ public class CommitTree {
     }
 
     private static void specialSituation(Commit spPoint, Commit branchCommit, String branchName) {
-        if (spPoint.equals(branchCommit)) {
+        if (spPoint.getVersion().equals(branchCommit.getVersion())) {
             System.out.print("Given branch is an ancestor of the current branch.");
             System.exit(0);
         }
-        if (spPoint.equals(fromFile(curBranchName))) {
+        if (spPoint.getShaName().equals(HEAD.getShaName())) {
             checkoutBranch(branchName);
             System.out.print("Current branch fast-forwarded.");
             System.exit(0);
@@ -503,12 +503,12 @@ public class CommitTree {
             System.out.print("Cannot merge a branch with itself.");
             System.exit(0);
         }
-        for (String file : CWDFile) {
-            if (CWDFile != null && !HEAD.getVersion().keySet().contains(file)) {
-                System.out.print("There is an untracked file in the way; delete it, or add and commit it first.");
-                System.exit(0);
-            }
-        }
+//        for (String file : CWDFile) {
+//            if (CWDFile != null && !HEAD.getVersion().keySet().contains(file)) {
+//                System.out.print("There is an untracked file in the way; delete it, or add and commit it first.");
+//                System.exit(0);
+//            }
+//        }
     }
 
     private static Commit findSplitPoint(HashMap<String, Integer> masterAncestors, HashMap<String, Integer> branchAncestors) {
