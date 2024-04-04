@@ -1,6 +1,6 @@
 package gitlet;
 
-// TODO: any imports you need here
+// TODO: any imports you need here.
 import java.util.Date;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -8,18 +8,18 @@ import java.util.TimeZone;
 import java.util.*;
 
 /** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
+ *  TODO: It's a good idea to give a description here of what else this Class.
  *  does at a high level.
  *
  *  @author bai
  */
 public class Commit implements Serializable {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Commit class here with a useful
-     * comment above them describing what that variable represents and how that
-     * variable is used. We've provided one example for `message`.
+    /*
+      TODO: add instance variables here.
+
+      List all instance variables of the Commit class here with a useful
+      comment above them describing what that variable represents and how that
+      variable is used. We've provided one example for `message`.
      */
 
     /** The message of this Commit. */
@@ -28,12 +28,15 @@ public class Commit implements Serializable {
     private String timestamp;
     private String shaName;
 
-    public HashMap<String, String> version;
+    private HashMap<String, String> version;
 
     /*
-    personal perspective is that we firstly creat a commit containing message and timestamp, and then when we
-    add the Commit to the CommitTree, we firstly set the ParentID of HEAD pointer, and then we cope the version map of
-    parent, update the version map according to the Stage.
+    personal perspective is that we firstly creat a commit
+    containing message and timestamp, and then when we
+    add the Commit to the CommitTree,
+    we firstly set the ParentID of HEAD pointer, a
+    nd then we cope the version map of parent,
+    update the version map according to the Stage.
      */
 
     public Commit(String message) {
@@ -65,17 +68,6 @@ public class Commit implements Serializable {
     public boolean checkVersionEmpty() {
         return version.isEmpty();
     }
-
-//    public void checkLegal() {
-//        if (this.message.isEmpty()) {
-//            System.out.println("Please enter a commit message.");
-//            System.exit(0);
-//        }
-//        if (StagingArea.checkAddFileExist() && StagingArea.checkRemFileExist() && this.parentID != null) {
-//            System.out.println("No changes added to the commit.");
-//            System.exit(0);
-//        }
-//    }
 
     public void updateVersion() {
         if (version.isEmpty()) {
@@ -127,7 +119,7 @@ public class Commit implements Serializable {
     }
 
     private String getSha1ID() {
-        if (parentID != null && version !=null) {
+        if (parentID != null && version != null) {
             return Utils.sha1(formatDate(true), message, parentID.toString(), version.toString());
         }
         return Utils.sha1(formatDate(true), message);
@@ -181,7 +173,7 @@ public class Commit implements Serializable {
         return shaName;
     }
 
-    public boolean IfVersionContain(String name) {
+    public boolean ifVersionContain(String name) {
         return version.containsKey(name);
     }
 

@@ -4,7 +4,6 @@ import java.io.File;
 
 import java.util.HashMap;
 
-import static gitlet.Utils.join;
 
 public class StagingArea {
     private static final File CWD = Repository.CWD;
@@ -22,7 +21,7 @@ public class StagingArea {
         try {
             additionStageFile.createNewFile();
             removalStageFile.createNewFile();
-        //TODO:creat the StagingArea
+        //  TODO:creat the StagingArea.
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -44,10 +43,8 @@ public class StagingArea {
         removalStage = (HashMap<String, String>) Utils.readObject(removalStageFile, HashMap.class);
     }
     public static void add(String name) {
-        //TODO:Serialize the file added and then store in the StagingArea
-        //TODO:How to get the file of the name?
-        /*
-         */
+        //  TODO:Serialize the file added and then store in the StagingArea.
+        //  TODO:How to get the file of the name?.
         readAddStage();
         readRmStage();
         CommitTree.readHEAD();
@@ -72,11 +69,11 @@ public class StagingArea {
 
     public static void rm(String name) {
         File file = Utils.join(CWD, name);
-        //TODO: if add, cancel
+        //  TODO: if add, cancel.
         if (additionStage.containsKey(name)) {
             additionStage.remove(name);
             saveAddStage();
-        }else if (CommitTree.HEAD.IfVersionContain(name)) {
+        } else if (CommitTree.HEAD.ifVersionContain(name)) {
             String rmID = CommitTree.HEAD.getFlieVersion(name);
             removalStage.put(name, rmID);
             saveRmStage();
@@ -87,7 +84,7 @@ public class StagingArea {
             System.out.println("No reason to remove the file");
             System.exit(0);
         }
-        //TODO: if commmit and track, remark delete and rm from CWD
+        //  TODO: if commmit and track, remark delete and rm from CWD.
     }
 
     public static void cleanStage() {
@@ -118,14 +115,14 @@ public class StagingArea {
     }
 
     public static Blobs fromFile(String SHA) {
-        String blobSha2 = SHA.substring(0,2);
+        String blobSha2 = SHA.substring(0, 2);
         String fileName = SHA.substring(2);
         File storeFile = Utils.join(indexFold, blobSha2, fileName);
         return Utils.readObject(storeFile, Blobs.class);
     }
 
     public static File getFile(String SHA) {
-        String blobSha2 = SHA.substring(0,2);
+        String blobSha2 = SHA.substring(0, 2);
         String fileName = SHA.substring(2);
         return Utils.join(indexFold, blobSha2, fileName);
     }

@@ -131,6 +131,37 @@ public class Text {
         log();
     }
 
+    @Test
+    public void test4() {
+        add(g);
+        add(f);
+        commit("2");
+        branch("other");
+        add(h);
+        rm(g);
+        commit("a h r g");
+        check("other");
+        merge("other");
+    }
+
+    private void reset2() {
+        add(g);
+        add(f);
+        commit("2");
+        branch("other");
+    }
+    @Test
+    public void test5() {
+        setup();
+        reset2();
+        branch("b1");
+        add(h);
+        commit("add h");
+        branch("b2");
+        rm(f);
+        commit("rm f");
+        merge("b1");
+    }
     private static String findSplitPoint(HashMap<String, Integer> masterAncestors, HashMap<String, Integer> branchAncestors) {
         Set<String> masters = masterAncestors.keySet();
         Set<String> branches = branchAncestors.keySet();

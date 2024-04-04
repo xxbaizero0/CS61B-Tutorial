@@ -5,21 +5,20 @@ import java.util.*;
 
 public class CommitTree {
     static final String OVER = "over";
-    static final String WRITE= "writer";
+    static final String WRITE = "writer";
     static final String DELETE = "delete";
     public static Commit HEAD;
-    public static Commit Master;
 
-    public static String curBranchName;
+    private static String curBranchName;
 
     static File indexFold = StagingArea.indexFold;
 
-    static File refs = Utils.join(Repository.GITLET_DIR,"refs"); //folder
+    static File refs = Utils.join(Repository.GITLET_DIR, "refs"); //folder
     static File heads = Utils.join(refs, "heads"); //folder
     static File master = Utils.join(heads, "master"); // file
     static File head = Utils.join(Repository.GITLET_DIR, "HEAD"); //file
 
-    static File CURBranch = Utils.join(Repository.GITLET_DIR, "curBranch");//file
+    static File CURBranch = Utils.join(Repository.GITLET_DIR, "curBranch"); //file
 
     static File commitList = Utils.join(refs, "cList");
     static List<String> cList = new ArrayList<>();
@@ -39,7 +38,6 @@ public class CommitTree {
     public static void init() {
         try {
             readHEAD();
-            Master = Utils.readObject(master, Commit.class);
             curBranchName = "master";
             Utils.writeObject(CURBranch, curBranchName);
         } catch (Exception e) {
@@ -94,9 +92,9 @@ public class CommitTree {
         addCList(c.getShaName());
     }
 
-    public static Commit fromFile(String SHA) {
-        String commitSha2 = SHA.substring(0,2);
-        String fileName = SHA.substring(2);
+    public static Commit fromFile(String sha) {
+        String commitSha2 = sha.substring(0,2);
+        String fileName = sha.substring(2);
         File storeFile = Utils.join(indexFold, commitSha2, fileName);
         if (!storeFile.exists()) {
             return null;
@@ -122,16 +120,6 @@ public class CommitTree {
 
     public static String readCurBranchAsString() {
         return Utils.readObject(CURBranch, String.class);
-//        List<String> bL = Utils.plainFilenamesIn(heads);
-//        if (bL != null) {
-//            for (String b : bL) {
-//                Commit c = Utils.readObject(Utils.join(heads, b), Commit.class);
-//                if (c.getShaName().equals(Utils.readObject(head, Commit.class).getShaName())) {
-//                    return b;
-//                }
-//            }
-//        }
-//        return null;
     }
 
     public static void creatBranch(String name) {
@@ -173,9 +161,9 @@ public class CommitTree {
         checkoutHelper(name, storedFile);
     }
 
-    public static void checkout(String ID, String name) {
-        // provide a filename and ID and put i in the CWD
-        Commit c = fromFile(ID);
+    public static void checkout(String id, String name) {
+        // provide a filename and id and put i in the CWD
+        Commit c = fromFile(id);
         if (c == null) {
             System.out.println("No commit with that id exists.");
             System.exit(0);
@@ -304,6 +292,8 @@ public class CommitTree {
                     }
                 }
                 break;
+            default:
+                return null;
         }
         switch (command) {
             case DELETE:
@@ -312,10 +302,11 @@ public class CommitTree {
                 return ExistBothBranchFile;
             case WRITE:
                 return noExistInMasterBranchFile;
+            default:
+                return null;
         }
-        return null;
     }
-    private static void checkIDExist(String commitId) {
+    private static void checkidExist(String commitId) {
         List<Commit> commitList = Repository.getComitList();
         for (Commit c : commitList) {
             if (c.getShaName().equals(commitId)) {
@@ -326,7 +317,7 @@ public class CommitTree {
         System.exit(0);
     }
     public static void reset(String commitId) {
-        checkIDExist(commitId);
+        checkidExist(commitId);
         Commit commit = fromFile(commitId);
         deleteNoExistFile(commit);
         StagingArea.cleanAddStage();
@@ -336,6 +327,8 @@ public class CommitTree {
     }
 
     public static void merge(String branch) {
+        // error check
+        mergeErrCheck(branch);
         Commit branchCommit = readBranch(branch);
         HashMap<String, Integer> branchAncestors = new HashMap<>();
         HashMap<String, Integer> masterAncestors = new HashMap<>();
@@ -355,15 +348,13 @@ public class CommitTree {
         Set<String> noExistFileSetOfBranch = opposeSet(existFileSetOfBranch, branchCommit);
         Set<String> existFileSetOfCurBranch = getCompareFile(HEAD, splitPoint, DELETE);
         Set<String> noExistFileSetOfCurBranch = opposeSet(existFileSetOfCurBranch, HEAD);
-        // error check
-        mergeErrCheck(branch);
         // specialSituation check
         specialSituation(splitPoint, branchCommit, branch);
         // normal situation
-        branchChangeHeadKeep(splitPoint, branchCommit, noChangeFileSetOfCurBranch, changeFileSetOfBranch, curVersion);
-        branchExistOthersNot(splitPoint, branchCommit, existFileSetOfBranch, existFileSetOfCurBranch, curVersion);
-        OneNotExistOneKeep(splitPoint, branchCommit, noExistFileSetOfCurBranch, noChangeFileSetOfBranch, curVersion);
-        OneNotExistOneKeep(splitPoint, branchCommit, noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
+        branchChangeHeadKeep(branchCommit, noChangeFileSetOfCurBranch, changeFileSetOfBranch, curVersion);
+        branchExistOthersNot(branchCommit, existFileSetOfBranch, existFileSetOfCurBranch, curVersion);
+        OneNotExistOneKeep(noExistFileSetOfCurBranch, noChangeFileSetOfBranch, curVersion);
+        OneNotExistOneKeep(noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
         checkTwoChangeIfSame(branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch);
 //        twoChangeButSame(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch, curVersion);
 //        twoChangeButDiff(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch, curVersion);
@@ -404,7 +395,9 @@ public class CommitTree {
         return result;
     }
 
-    private static void checkTwoChangeIfSame(Commit branchCommit, Set<String> changeFileSetOfBranch, Set<String> changeFileSetOfCurBranch) {
+    private static void checkTwoChangeIfSame(Commit branchCommit,
+                                             Set<String> changeFileSetOfBranch,
+                                             Set<String> changeFileSetOfCurBranch) {
         for (String file : changeFileSetOfBranch) {
             String branchVersion =  branchCommit.getFlieVersion(file);
             String masterVersion = HEAD.getFlieVersion(file);
@@ -429,7 +422,9 @@ public class CommitTree {
 //
 //    }
 
-    private static void OneNotExistOneKeep(Commit splitPoint, Commit branchCommit, Set<String> notExistFiles, Set<String> noChangeFiles, HashMap<String, String> curVersion) {
+    private static void OneNotExistOneKeep(Set<String> notExistFiles,
+                                           Set<String> noChangeFiles,
+                                           HashMap<String, String> curVersion) {
         if (noChangeFiles == null) {
             return;
         }
@@ -437,14 +432,17 @@ public class CommitTree {
         copy.removeAll(noChangeFiles);
         for (String file : copy) {
             curVersion.remove(file);
-            File CWDfile =  Utils.join(Repository.CWD, file);
-            if (CWDfile.exists()) {
-                CWDfile.delete();
+            File cwdFile =  Utils.join(Repository.CWD, file);
+            if (cwdFile.exists()) {
+                cwdFile.delete();
             }
         }
     }
 
-    private static void branchExistOthersNot(Commit splitPoint, Commit branchCommit, Set<String> existFileSetOfBranch, Set<String> existFileSetOfCurBranch, HashMap<String, String> curVersion) {
+    private static void branchExistOthersNot(Commit branchCommit,
+                                             Set<String> existFileSetOfBranch,
+                                             Set<String> existFileSetOfCurBranch,
+                                             HashMap<String, String> curVersion) {
         if (existFileSetOfBranch == null) {
             return;
         }
@@ -457,7 +455,10 @@ public class CommitTree {
         }
     }
 
-    private static void branchChangeHeadKeep(Commit splitPoint, Commit branchCommit, Set<String> curBranchCommit, Set<String> changeFileSetOfBranch, HashMap<String, String> curVersion) {
+    private static void branchChangeHeadKeep(Commit branchCommit,
+                                             Set<String> curBranchCommit,
+                                             Set<String> changeFileSetOfBranch,
+                                             HashMap<String, String> curVersion) {
         if (changeFileSetOfBranch == null) {
             return;
         }
@@ -474,14 +475,14 @@ public class CommitTree {
         }
     }
 
-    private static void specialSituation(Commit splitPoint, Commit branchCommit, String branchName) {
-        if (splitPoint.equals(branchCommit)) {
-            System.out.println("Given branch is an ancestor of the current branch.");
+    private static void specialSituation(Commit spPoint, Commit branchCommit, String branchName) {
+        if (spPoint.equals(branchCommit)) {
+            System.out.print("Given branch is an ancestor of the current branch.");
             System.exit(0);
         }
-        if (splitPoint.equals(fromFile(curBranchName))) {
+        if (spPoint.equals(fromFile(curBranchName))) {
             checkoutBranch(branchName);
-            System.out.println("Current branch fast-forwarded.");
+            System.out.print("Current branch fast-forwarded.");
             System.exit(0);
         }
     }
@@ -495,16 +496,16 @@ public class CommitTree {
         }
 
         if (!branchList.contains(branch)) {
-            System.out.println("A branch with that name does not exist.");
+            System.out.print("A branch with that name does not exist.");
             System.exit(0);
         }
-        if (branch == curBranchName) {
-            System.out.println("Cannot merge a branch with itself.");
+        if (branch.equals(curBranchName)) {
+            System.out.print("Cannot merge a branch with itself.");
             System.exit(0);
         }
         for (String file : CWDFile) {
             if (CWDFile != null && !HEAD.getVersion().keySet().contains(file)) {
-                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.out.print("There is an untracked file in the way; delete it, or add and commit it first.");
                 System.exit(0);
             }
         }
@@ -525,13 +526,13 @@ public class CommitTree {
         return fromFile(latestCommit);
     }
 
-    private static void findAncestors(Commit commit, HashMap<String, Integer> branchAncestors, Integer dis) {
+    private static void findAncestors(Commit commit, HashMap<String, Integer> branches, Integer dis) {
         if (commit.getParent(0) == null) {
-            branchAncestors.put(commit.getShaName(), dis);
+            branches.put(commit.getShaName(), dis);
             return;
         }
-        branchAncestors.put(commit.getShaName(), dis);
+        branches.put(commit.getShaName(), dis);
         Commit parentCommit = fromFile(commit.getParent(0));
-        findAncestors(parentCommit, branchAncestors, dis + 1);
+        findAncestors(parentCommit, branches, dis + 1);
     }
 }
