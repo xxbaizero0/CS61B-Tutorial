@@ -2,9 +2,7 @@ package gitlet;
 
 import java.io.File;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static gitlet.Utils.join;
 
@@ -32,7 +30,7 @@ public class StagingArea {
 
     @SuppressWarnings("unchecked")
     public static void readAddStage() {
-        if (checkAddFileExist()) {
+        if (checkAddFileExistFile()) {
             return;
         }
         additionStage = (HashMap<String, String>) Utils.readObject(additionStageFile, HashMap.class);
@@ -40,7 +38,7 @@ public class StagingArea {
 
     @SuppressWarnings("unchecked")
     public static void readRmStage() {
-        if (checkRemFileExist()) {
+        if (checkRemFileExistFile()) {
             return;
         }
         removalStage = (HashMap<String, String>) Utils.readObject(removalStageFile, HashMap.class);
@@ -168,11 +166,11 @@ public class StagingArea {
         return removalStage.get(name);
     }
 
-    public static boolean checkAddFileExist() {
+    public static boolean checkAddFileExistFile() {
         return Utils.readContentsAsString(additionStageFile).isEmpty();
     }
 
-    public static boolean checkRemFileExist() {
+    public static boolean checkRemFileExistFile() {
         return Utils.readContentsAsString(removalStageFile).isEmpty();
     }
 }

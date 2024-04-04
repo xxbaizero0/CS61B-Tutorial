@@ -245,6 +245,7 @@ public class Repository {
         CommitTree.readHEAD();
         StagingArea.readRmStage();
         StagingArea.readAddStage();
+        CommitTree.readCurBranch();
         CommitTree.merge(branch);
     }
 }

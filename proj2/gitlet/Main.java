@@ -1,7 +1,7 @@
 package gitlet;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
- *  @author TODO
+ *  @author bai
  */
 public class Main {
 
@@ -18,7 +18,7 @@ public class Main {
         switch(firstArg) {
             case "init":
                 // TODO: handle the `init` command
-                validArgs(args, 1);
+                //validArgs(args, 1);
                 Repository.initCommand();
                 break;
             case "add":

@@ -86,6 +86,7 @@ public class Commit implements Serializable {
             }
             return;
         }
+        List<String> rmList = new ArrayList<>();
         for (String na : version.keySet()) {
             String preVersion = version.get(na);
             String curVersion = StagingArea.getAddStage(na);
@@ -93,10 +94,20 @@ public class Commit implements Serializable {
             if (preVersion != null && !preVersion.equals(curVersion) && curVersion != null) {
                 version.put(na, curVersion);
             }
-            version.remove(rmVersion);
+            if (rmVersion != null) {
+                rmList.add(na);
+            }
         }
+        rmFromVersion(rmList);
         addToVersion();
     }
+
+    private void rmFromVersion(List<String> rmlist) {
+        for (String rm : rmlist) {
+            version.remove(rm);
+        }
+    }
+
     private void addToVersion() {
         Set<String> addStage = StagingArea.additionStage.keySet();
         for (String addition : addStage) {
@@ -112,7 +123,7 @@ public class Commit implements Serializable {
     }
 
     public void setVersionMap(HashMap<String, String> version) {
-        this.version = version;
+        this.version = new HashMap<>(version);
     }
 
     private String getSha1ID() {
@@ -128,15 +139,15 @@ public class Commit implements Serializable {
         StringBuilder sb = new StringBuilder();
         sb.append("===");
         sb.append("\ncommit ").append(shaName);
-        sb.append("\nDate: ").append(timestamp);
-        sb.append("\n").append(message);
         if (parentID != null && parentID.size() > 1) {
             sb.append("\nMerge: ");
             Commit par1 = CommitTree.fromFile(parentID.get(0));
             Commit par2 = CommitTree.fromFile(parentID.get(1));
-            sb.append(par1.getSha1ID(), 0, 7);
-            sb.append(" ").append(par2.getSha1ID(), 0, 7);
+            sb.append(par1.getShaName(), 0, 7);
+            sb.append(" ").append(par2.getShaName(), 0, 7);
         }
+        sb.append("\nDate: ").append(timestamp);
+        sb.append("\n").append(message);
         sb.append("\n");
         sb.append("\n");
         return sb.toString();
@@ -148,6 +159,10 @@ public class Commit implements Serializable {
             return null;
         }
         return parentID.get(n);
+    }
+
+    public void setParentID(List<String> parentID) {
+        this.parentID = parentID;
     }
 
     public String getMessage() {

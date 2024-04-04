@@ -1,10 +1,7 @@
 package gitlet;
 import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class CommitTree {
     static final String OVER = "over";
@@ -81,7 +78,7 @@ public class CommitTree {
             addCList(c.getShaName());
             return;
         }
-        if (StagingArea.checkAddFileExist() && StagingArea.checkRemFileExist()) {
+        if (StagingArea.checkAddFileExistFile() && StagingArea.checkRemFileExistFile()) {
             System.out.println("No changes added to the commit.");
             System.exit(0);
         }
@@ -226,7 +223,7 @@ public class CommitTree {
 
     private static void deleteNoExistFile(Commit branch) {
         //TODO: get noExistInCurBranchFIle;
-        List<String> files = getCompareFile(branch, DELETE);
+        Set<String> files = getCompareFile(HEAD, branch, DELETE);
         for (String file : files) {
             Utils.join(Repository.CWD, file).delete();
         }
@@ -234,7 +231,7 @@ public class CommitTree {
 
     private static void writerFile(Commit branch) {
         //TODO: get InCurBranchFIleButHead;
-        List<String> files = getCompareFile(branch, WRITE);
+        Set<String> files = getCompareFile(HEAD, branch, WRITE);
         List<String> CWDFile = Utils.plainFilenamesIn(Repository.CWD);
         for (String file : files) {
             if (CWDFile != null && CWDFile.contains(file)) {
@@ -246,7 +243,7 @@ public class CommitTree {
     }
 
     private static void overwriteFile(Commit branch) {
-        List<String> files = getCompareFile(branch, OVER);
+        Set<String> files = getCompareFile(HEAD, branch, OVER);
         for (String file : files) {
             Utils.join(Repository.CWD, file).delete();
             writerNewFile(branch, file);
@@ -279,12 +276,12 @@ public class CommitTree {
         return newBranch;
     }
 
-    private static List<String> getCompareFile(Commit branch,String command) {
+    private static Set<String> getCompareFile(Commit curBranch, Commit branch, String command) {
         Set<String> branchVersion = branch.getVersion().keySet();
-        Set<String> headVersion = HEAD.getVersion().keySet();
-        List<String> noExistInCurBranchFile = new ArrayList<>();
-        List<String> ExistBothBranchFile = new ArrayList<>();
-        List<String> noExistInMasterBranchFile = new ArrayList<>();
+        Set<String> headVersion = curBranch.getVersion().keySet();
+        Set<String> noExistInCurBranchFile = new HashSet<>();
+        Set<String> ExistBothBranchFile = new HashSet<>();
+        Set<String> noExistInMasterBranchFile = new HashSet<>();
         switch (command) {
             case DELETE:
                 for (String file : headVersion) {
@@ -340,71 +337,201 @@ public class CommitTree {
 
     public static void merge(String branch) {
         Commit branchCommit = readBranch(branch);
-        Set<String> branchAncestors = new HashSet<>();
-        Set<String> masterAncestors = new HashSet<>();
-        findAncestors(branchCommit, branchAncestors);
-        findAncestors(HEAD, masterAncestors);
+        HashMap<String, Integer> branchAncestors = new HashMap<>();
+        HashMap<String, Integer> masterAncestors = new HashMap<>();
+        CommitTree.readHEAD();
+        findAncestors(branchCommit, branchAncestors, 0);
+        findAncestors(HEAD, masterAncestors, 0);
         // get splitPoint
         Commit splitPoint = findSplitPoint(masterAncestors, branchAncestors);
+        HashMap<String, String> curVersion = HEAD.getVersion();
         // get changSet
-        Set<String> changeFileSetOfBranch = new HashSet<>();
-        Set<String> changeFileSetOfCurBranch = new HashSet<>();
+        Set<String> changeFileSetOfBranch = getChangeSet(branchCommit, splitPoint);
+        Set<String> noChangeFileSetOfBranch = opposeSet(changeFileSetOfBranch, branchCommit);
+        Set<String> changeFileSetOfCurBranch = getChangeSet(HEAD, splitPoint);
+        Set<String> noChangeFileSetOfCurBranch = opposeSet(changeFileSetOfCurBranch, HEAD);
         // get existSet
-        Set<String> existFileSetOfBranch = new HashSet<>();
-        Set<String> existFileSetOfCurBranch = new HashSet<>();
+        Set<String> existFileSetOfBranch = getCompareFile(branchCommit, splitPoint, DELETE);
+        Set<String> noExistFileSetOfBranch = opposeSet(existFileSetOfBranch, branchCommit);
+        Set<String> existFileSetOfCurBranch = getCompareFile(HEAD, splitPoint, DELETE);
+        Set<String> noExistFileSetOfCurBranch = opposeSet(existFileSetOfCurBranch, HEAD);
         // error check
         mergeErrCheck(branch);
         // specialSituation check
-        specialSituation(splitPoint, branchCommit);
+        specialSituation(splitPoint, branchCommit, branch);
         // normal situation
-        oneChangeOneKeep(splitPoint, branchCommit, changeFileSetOfBranch);
-        oneExistOthersNot(splitPoint, branchCommit, existFileSetOfBranch, opposeSet(existFileSetOfCurBranch));
-        MasterNotExistBranchKeep(splitPoint, branchCommit, opposeSet(existFileSetOfCurBranch), changeFileSetOfCurBranch);
-        BranchNotExistMasterKeep(splitPoint, branchCommit, opposeSet(existFileSetOfBranch), changeFileSetOfCurBranch);
-        twoChangeButSame(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch);
-        twoChangeButDiff(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch);
+        branchChangeHeadKeep(splitPoint, branchCommit, noChangeFileSetOfCurBranch, changeFileSetOfBranch, curVersion);
+        branchExistOthersNot(splitPoint, branchCommit, existFileSetOfBranch, existFileSetOfCurBranch, curVersion);
+        OneNotExistOneKeep(splitPoint, branchCommit, noExistFileSetOfCurBranch, noChangeFileSetOfBranch, curVersion);
+        OneNotExistOneKeep(splitPoint, branchCommit, noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
+        checkTwoChangeIfSame(branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch);
+//        twoChangeButSame(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch, curVersion);
+//        twoChangeButDiff(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch, curVersion);
+        String message = "Merged " + branch + " into " + curBranchName + ".";
+        creatMergeCommmit(message, curVersion, branchCommit.getShaName(), HEAD.getShaName());
     }
 
-    private static Set<String> opposeSet(Set<String> FileSet) {
-        return null;
+    private static void creatMergeCommmit(String message, HashMap<String, String> curVersion, String shaName, String shaName1) {
+        List<String> parents = new ArrayList<>(List.of(shaName, shaName1));
+        Commit commit = new Commit(message);
+        commit.setParentID(parents);
+        commit.setVersionMap(curVersion);
+        commit.setShaName();
+        Utils.writeObject(head, commit);
+        Utils.writeObject(Utils.join(heads, curBranchName), commit);
     }
 
-    private static void twoChangeButDiff(Commit splitPoint, Commit branchCommit, Set<String> changeFileSetOfBranch, Set<String> changeFileSetOfCurBranch) {
+    private static Set<String> getChangeSet(Commit branchCommit, Commit splitPoint) {
+        HashMap<String, String> branchVersion = branchCommit.getVersion();
+        HashMap<String, String> splitPointVersion = splitPoint.getVersion();
+        Set<String> changeSet = new HashSet<>();
+        Set<String> bothExistSet = getCompareFile(branchCommit, splitPoint, OVER);
+        if (bothExistSet != null) {
+            for (String file : bothExistSet) {
+                if (!branchVersion.get(file).equals(splitPointVersion.get(file))) {
+                    changeSet.add(file);
+                }
+            }
+        }
+        return changeSet;
     }
 
-    private static void twoChangeButSame(Commit splitPoint, Commit branchCommit, Set<String> changeFileSetOfBranch, Set<String> changeFileSetOfCurBranch) {
+    private static Set<String> opposeSet(Set<String> FileSet, Commit Branch) {
+        Set<String> formerSet = Branch.getVersion().keySet();
+        Set<String> copy = new HashSet<>(formerSet);
+        copy.removeAll(FileSet);
+        Set<String> result = new HashSet<>(copy);
+        return result;
     }
 
-    private static void BranchNotExistMasterKeep(Commit splitPoint, Commit branchCommit, Set<String> existFileSetOfBranch, Set<String> changeFileSetOfCurBranch) {
+    private static void checkTwoChangeIfSame(Commit branchCommit, Set<String> changeFileSetOfBranch, Set<String> changeFileSetOfCurBranch) {
+        for (String file : changeFileSetOfBranch) {
+            String branchVersion =  branchCommit.getFlieVersion(file);
+            String masterVersion = HEAD.getFlieVersion(file);
+            if (branchVersion.equals(masterVersion)) {
+                //twoChangeButSame();
+                return;
+            } else {
+                //twoChangeButDiff();
+                return;
+            }
+        }
     }
 
-    private static void MasterNotExistBranchKeep(Commit splitPoint, Commit branchCommit, Set<String> existFileSetOfCurBranch, Set<String> changeFileSetOfCurBranch) {
+    private static void twoChangeButDiff(Commit splitPoint, Commit branchCommit, Set<String> changeFileSetOfBranch, Set<String> changeFileSetOfCurBranch, HashMap<String, String> curVersion) {
+        return;
     }
 
-    private static void oneExistOthersNot(Commit splitPoint, Commit branchCommit, Set<String> existFileSetOfBranch, Set<String> existFileSetOfCurBranch) {
+//    private static void twoChangeButSame(Commit splitPoint, Commit branchCommit, Set<String> changeFileSetOfBranch, Set<String> changeFileSetOfCurBranch, HashMap<String, String> curVersion) {
+//    }
+
+//    private static void BranchNotExistMasterKeep(Commit splitPoint, Commit branchCommit, Set<String> notExistFile, Set<String> changeFileSetOfCurBranch, HashMap<String, String> curVersion) {
+//
+//    }
+
+    private static void OneNotExistOneKeep(Commit splitPoint, Commit branchCommit, Set<String> notExistFiles, Set<String> noChangeFiles, HashMap<String, String> curVersion) {
+        if (noChangeFiles == null) {
+            return;
+        }
+        Set<String> copy = new HashSet<>(notExistFiles);
+        copy.removeAll(noChangeFiles);
+        for (String file : copy) {
+            curVersion.remove(file);
+            File CWDfile =  Utils.join(Repository.CWD, file);
+            if (CWDfile.exists()) {
+                CWDfile.delete();
+            }
+        }
     }
 
-    private static void oneChangeOneKeep(Commit splitPoint, Commit branchCommit, Set<String> changeFileSetOfBranch) {
+    private static void branchExistOthersNot(Commit splitPoint, Commit branchCommit, Set<String> existFileSetOfBranch, Set<String> existFileSetOfCurBranch, HashMap<String, String> curVersion) {
+        if (existFileSetOfBranch == null) {
+            return;
+        }
+        Set<String> copy = new HashSet<>(existFileSetOfBranch);
+        copy.removeAll(existFileSetOfCurBranch);
+        for (String file : copy) {
+            String newVersion = branchCommit.getFlieVersion(file);
+            curVersion.put(file, newVersion);
+            writerNewFile(branchCommit, file);
+        }
     }
 
-    private static Set<String> findIfExist(Set<String> splitFileSet, Set<String> curFileSet) {
-        return null;
+    private static void branchChangeHeadKeep(Commit splitPoint, Commit branchCommit, Set<String> curBranchCommit, Set<String> changeFileSetOfBranch, HashMap<String, String> curVersion) {
+        if (changeFileSetOfBranch == null) {
+            return;
+        }
+        Set<String> copy = new HashSet<>(changeFileSetOfBranch);
+        copy.removeAll(curBranchCommit);
+        for (String file : copy) {
+            String newVersion = branchCommit.getFlieVersion(file);
+            curVersion.put(file, newVersion);
+            File CWDfile =  Utils.join(Repository.CWD, file);
+            if (CWDfile.exists()) {
+                CWDfile.delete();
+            }
+            writerNewFile(branchCommit, file);
+        }
     }
 
-    private static Set<String> findIfChange(Set<String> splitFileSet, Set<String> curFileSet) {
-        return null;
-    }
-
-    private static Commit findSplitPoint(Set<String> masterAncestors, Set<String> branchAncestors) {
-        return null;
-    }
-
-    private static void specialSituation(Commit splitPoint, Commit branchCommit) {
+    private static void specialSituation(Commit splitPoint, Commit branchCommit, String branchName) {
+        if (splitPoint.equals(branchCommit)) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+            System.exit(0);
+        }
+        if (splitPoint.equals(fromFile(curBranchName))) {
+            checkoutBranch(branchName);
+            System.out.println("Current branch fast-forwarded.");
+            System.exit(0);
+        }
     }
 
     private static void mergeErrCheck(String branch) {
+        List<String> branchList = Utils.plainFilenamesIn(heads);
+        List<String> CWDFile = Utils.plainFilenamesIn(Repository.CWD);
+        if (!StagingArea.checkAddEmpty() || !StagingArea.checkRemEmpty()) {
+            System.out.println("You have uncommitted changes.");
+            System.exit(0);
+        }
+
+        if (!branchList.contains(branch)) {
+            System.out.println("A branch with that name does not exist.");
+            System.exit(0);
+        }
+        if (branch == curBranchName) {
+            System.out.println("Cannot merge a branch with itself.");
+            System.exit(0);
+        }
+        for (String file : CWDFile) {
+            if (CWDFile != null && !HEAD.getVersion().keySet().contains(file)) {
+                System.out.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                System.exit(0);
+            }
+        }
     }
 
-    private static void findAncestors(Commit Commit, Set<String> branchAncestors) {
+    private static Commit findSplitPoint(HashMap<String, Integer> masterAncestors, HashMap<String, Integer> branchAncestors) {
+        Set<String> masters = masterAncestors.keySet();
+        Set<String> branches = branchAncestors.keySet();
+        branches.retainAll(masters);
+        String latestCommit = "";
+        int minDis = 10000;
+        for (String name : branches) {
+            if (masterAncestors.get(name) < minDis) {
+                latestCommit = name;
+                minDis = masterAncestors.get(name);
+            }
+        }
+        return fromFile(latestCommit);
+    }
+
+    private static void findAncestors(Commit commit, HashMap<String, Integer> branchAncestors, Integer dis) {
+        if (commit.getParent(0) == null) {
+            branchAncestors.put(commit.getShaName(), dis);
+            return;
+        }
+        branchAncestors.put(commit.getShaName(), dis);
+        Commit parentCommit = fromFile(commit.getParent(0));
+        findAncestors(parentCommit, branchAncestors, dis + 1);
     }
 }

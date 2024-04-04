@@ -1,9 +1,10 @@
 package gitlet;
 
-import gitlet.*;
-
+import static org.junit.Assert.*;
+import org.junit.Test;
 import java.io.File;
-import java.io.IOException;
+import java.util.HashMap;
+import java.util.Set;
 
 public class Text {
     static String[] init = new String[]{"init"};
@@ -59,31 +60,92 @@ public class Text {
         Main.main(new String[]{"checkout", checkBranch});
     }
 
+    private static void merge(String checkBranch) {
+        Main.main(new String[]{"merge", checkBranch});
+    }
+
     private static void status() {
         Main.main(new String[]{"status"});
     }
 
+    private static void global_log() {
+        Main.main(new String[]{"global-log"});
+    }
 
-    public static void setup() {
+    static String g = "g.txt";
+    static String f = "f.txt";
+    static String h = "h.txt";
+    static String k = "k.txt";
+
+
+    @Test
+    public void setup() {
         File rep = Repository.GITLET_DIR;
         if (rep.exists()) {
             deleteFolder(rep);
         }
-        creatNewFile("hello.txt");
-        creatNewFile("hello2.txt");
-        creatNewFile("hello3.txt");
+        creatNewFile(g);
+        creatNewFile(f);
+        creatNewFile(h);
+        creatNewFile(k);
         Main.main(init);
-//        Main.main(add);
-//        Main.main(status);
-//
-//        Main.main(commit);
-//        Main.main(status);
-//        Main.main(check);
-//
-//        Main.main(log);
     }
 
-    public static void test2() {
+    @Test
+    public void test2() {
+        setup();
+        HashMap<String, Integer> masterAncestors = new HashMap<>();
+        masterAncestors.put("1", 4);
+        masterAncestors.put("2", 3);
+        masterAncestors.put("3", 2);
+        masterAncestors.put("4", 1);
+        masterAncestors.put("5", 0);
+        HashMap<String, Integer> branchAncestors = new HashMap<>();
+        branchAncestors.put("1", 5);
+        branchAncestors.put("22", 4);
+        branchAncestors.put("33", 3);
+        branchAncestors.put("44", 2);
+        branchAncestors.put("55", 1);
+        branchAncestors.put("66", 0);
+        String split = findSplitPoint(masterAncestors, branchAncestors);
+        assertEquals(split, "1");
+    }
+
+    @Test
+    public void test() {
+        setup();
+        add(g);
+        add(f);
+        commit("1");
+        branch("other");
+        add(h);
+        rm(g);
+        commit("add h, rm g");
+        check("other");
+        rm(f);
+        add(k);
+        commit("rm f, add k");
+        check("master");
+        global_log();
+        merge("other");
+        log();
+    }
+
+    private static String findSplitPoint(HashMap<String, Integer> masterAncestors, HashMap<String, Integer> branchAncestors) {
+        Set<String> masters = masterAncestors.keySet();
+        Set<String> branches = branchAncestors.keySet();
+        branches.retainAll(masters);
+        String latestCommit = "";
+        int minDis = 10000;
+        for (String name : branches) {
+            if (masterAncestors.get(name) < minDis) {
+                latestCommit = name;
+            }
+        }
+        return latestCommit;
+    }
+
+    private static void test3() {
         String branch = "new";
         branch(branch);
         add("hello.txt");
@@ -96,15 +158,11 @@ public class Text {
         check("master");
     }
 
-    private static void test3() {
-        Main.main(check);
-    }
-
-    public static void main(String[] args) {
-        setup();
-        test2();
-        //Main.main(rm);
-    }
+//    public static void main(String[] args) {
+//        setup();
+//        test2();
+//        //Main.main(rm);
+//    }
 
     public static void deleteFolder(File folder) {
         if (folder.isDirectory()) {
