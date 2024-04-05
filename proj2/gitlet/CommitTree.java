@@ -358,7 +358,7 @@ public class CommitTree {
 //        OneNotExistOneKeep(noExistFileSetOfCurBranch, noChangeFileSetOfCurBranch, curVersion);
         checkTwoChangeIfSame(branchCommit, splitSet, changeFileSetOfBranch, noExistFileSetOfBranch, changeFileSetOfCurBranch, noExistFileSetOfCurBranch,curVersion);
         String message = "Merged " + branch + " into " + curBranchName + ".";
-        creatMergeCommmit(message, curVersion, branchCommit.getShaName(), HEAD.getShaName());
+        creatMergeCommmit(message, curVersion, HEAD.getShaName(), branchCommit.getShaName());
         // a amazing bug, if this two String change their place will result err.
     }
 
