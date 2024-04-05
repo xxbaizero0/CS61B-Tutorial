@@ -356,7 +356,7 @@ public class CommitTree {
         branchExistOthersNot(branchCommit, existFileSetOfBranch, existFileSetOfCurBranch, curVersion);
         OneNotExistOneKeep(splitSet, noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
 //        OneNotExistOneKeep(noExistFileSetOfCurBranch, noChangeFileSetOfCurBranch, curVersion);
-        checkTwoChangeIfSame(branchCommit, splitSet, changeFileSetOfBranch, noExistFileSetOfBranch, changeFileSetOfCurBranch, noExistFileSetOfBranch,curVersion);
+        checkTwoChangeIfSame(branchCommit, splitSet, changeFileSetOfBranch, noExistFileSetOfBranch, changeFileSetOfCurBranch, noExistFileSetOfCurBranch,curVersion);
         String message = "Merged " + branch + " into " + curBranchName + ".";
         creatMergeCommmit(message, curVersion, branchCommit.getShaName(), HEAD.getShaName());
     }
@@ -415,7 +415,7 @@ public class CommitTree {
         Set<String> copy = new HashSet<>(changeFileSetOfBranch);
         copy.addAll(noExistFileSetOfBranch);
         copy.retainAll(splitSet);
-        copy.addAll(anyChangeOfBranch);
+        copy.retainAll(anyChangeOfBranch);
         for (String file : copy) {
             String branchVersion =  branchCommit.getFlieVersion(file);
             String masterVersion = HEAD.getFlieVersion(file);
