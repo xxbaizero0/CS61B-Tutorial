@@ -328,7 +328,7 @@ public class CommitTree {
 
     public static void merge(String branch) {
         // error check
-        mergeErrCheck(branch);
+//        mergeErrCheck(branch);
         Commit branchCommit = readBranch(branch);
         HashMap<String, Integer> branchAncestors = new HashMap<>();
         HashMap<String, Integer> masterAncestors = new HashMap<>();
@@ -355,10 +355,10 @@ public class CommitTree {
         branchChangeHeadKeep(branchCommit, noChangeFileSetOfCurBranch, changeFileSetOfBranch, curVersion);
         branchExistOthersNot(branchCommit, existFileSetOfBranch, existFileSetOfCurBranch, curVersion);
         OneNotExistOneKeep(splitSet, noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
-//        OneNotExistOneKeep(noExistFileSetOfCurBranch, noChangeFileSetOfCurBranch, curVersion);
+//        OneNotExistOneKeep(splitSet, noExistFileSetOfCurBranch, noChangeFileSetOfBranch, curVersion);
         checkTwoChangeIfSame(branchCommit, splitSet, changeFileSetOfBranch, noExistFileSetOfBranch, changeFileSetOfCurBranch, noExistFileSetOfCurBranch,curVersion);
         String message = "Merged " + branch + " into " + curBranchName + ".";
-        creatMergeCommmit(message, curVersion, branchCommit.getShaName(), HEAD.getShaName());
+        creatMergeCommmit(message, curVersion, HEAD.getShaName(), branchCommit.getShaName());
     }
 
     private static void creatMergeCommmit(String message, HashMap<String, String> curVersion, String shaName, String shaName1) {
@@ -417,6 +417,9 @@ public class CommitTree {
         copy.retainAll(splitSet);
         copy.retainAll(anyChangeOfBranch);
         for (String file : copy) {
+            if (noExistFileSetOfBranch.contains(file) && noExistFileSetOfCurBranch.contains(file)) {
+                continue;
+            }
             String branchVersion =  branchCommit.getFlieVersion(file);
             String masterVersion = HEAD.getFlieVersion(file);
             if (branchVersion != null && branchVersion.equals(masterVersion)) {
