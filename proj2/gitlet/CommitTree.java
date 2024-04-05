@@ -355,9 +355,7 @@ public class CommitTree {
         branchExistOthersNot(branchCommit, existFileSetOfBranch, existFileSetOfCurBranch, curVersion);
         OneNotExistOneKeep(noExistFileSetOfCurBranch, noChangeFileSetOfBranch, curVersion);
         OneNotExistOneKeep(noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
-        checkTwoChangeIfSame(branchCommit, changeFileSetOfBranch, curVersion);
-//        twoChangeButSame(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch, curVersion);
-//        twoChangeButDiff(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch, curVersion);
+        checkTwoChangeIfSame(branchCommit, changeFileSetOfBranch,changeFileSetOfCurBranch ,curVersion);
         String message = "Merged " + branch + " into " + curBranchName + ".";
         creatMergeCommmit(message, curVersion, branchCommit.getShaName(), HEAD.getShaName());
     }
@@ -397,8 +395,11 @@ public class CommitTree {
 
     private static void checkTwoChangeIfSame(Commit branchCommit,
                                              Set<String> changeFileSetOfBranch,
+                                             Set<String> changeFileSetOfCurBranch,
                                              HashMap<String, String> curVersion) {
-        for (String file : changeFileSetOfBranch) {
+        Set<String> copy = new HashSet<>(changeFileSetOfBranch);
+        copy.retainAll(changeFileSetOfCurBranch);
+        for (String file : copy) {
             String branchVersion =  branchCommit.getFlieVersion(file);
             String masterVersion = HEAD.getFlieVersion(file);
             if (branchVersion.equals(masterVersion)) {
@@ -475,7 +476,7 @@ public class CommitTree {
             return;
         }
         Set<String> copy = new HashSet<>(changeFileSetOfBranch);
-        copy.removeAll(curBranchCommit);
+        copy.retainAll(curBranchCommit);
         for (String file : copy) {
             String newVersion = branchCommit.getFlieVersion(file);
             curVersion.put(file, newVersion);
