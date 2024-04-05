@@ -337,6 +337,7 @@ public class CommitTree {
         findAncestors(HEAD, masterAncestors, 0);
         // get splitPoint
         Commit splitPoint = findSplitPoint(masterAncestors, branchAncestors);
+        Set<String> splitSet = splitPoint.getVersion().keySet();
         HashMap<String, String> curVersion = HEAD.getVersion();
         // specialSituation check
         specialSituation(splitPoint, branchCommit, branch);
@@ -347,14 +348,14 @@ public class CommitTree {
         Set<String> noChangeFileSetOfCurBranch = opposeSet(changeFileSetOfCurBranch, HEAD);
         // get existSet
         Set<String> existFileSetOfBranch = getCompareFile(branchCommit, splitPoint, DELETE);
-        Set<String> noExistFileSetOfBranch = opposeSet(existFileSetOfBranch, branchCommit);
+        Set<String> noExistFileSetOfBranch = noExistSet(splitSet, HEAD.getVersion().keySet(), branchCommit.getVersion().keySet());
         Set<String> existFileSetOfCurBranch = getCompareFile(HEAD, splitPoint, DELETE);
-        Set<String> noExistFileSetOfCurBranch = opposeSet(existFileSetOfCurBranch, HEAD);
+        //Set<String> noExistFileSetOfCurBranch = noExistSet(splitPoint.getVersion().keySet(), branchCommit.getVersion().keySet(), HEAD.getVersion().keySet());
         // normal situation
         branchChangeHeadKeep(branchCommit, noChangeFileSetOfCurBranch, changeFileSetOfBranch, curVersion);
         branchExistOthersNot(branchCommit, existFileSetOfBranch, existFileSetOfCurBranch, curVersion);
-        OneNotExistOneKeep(noExistFileSetOfCurBranch, noChangeFileSetOfBranch, curVersion);
-        OneNotExistOneKeep(noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
+        OneNotExistOneKeep(splitSet, noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
+//        OneNotExistOneKeep(noExistFileSetOfCurBranch, noChangeFileSetOfCurBranch, curVersion);
         checkTwoChangeIfSame(branchCommit, changeFileSetOfBranch,changeFileSetOfCurBranch ,curVersion);
         String message = "Merged " + branch + " into " + curBranchName + ".";
         creatMergeCommmit(message, curVersion, branchCommit.getShaName(), HEAD.getShaName());
@@ -393,6 +394,14 @@ public class CommitTree {
         return result;
     }
 
+    private static Set<String> noExistSet(Set<String> splitPointSet, Set<String> branchAllSet, Set<String> curBranchAllSet) {
+        Set<String> copy = new HashSet<>(branchAllSet);
+        copy.addAll(branchAllSet);
+        copy.addAll(splitPointSet);
+        copy.removeAll(curBranchAllSet);
+        return copy;
+    }
+
     private static void checkTwoChangeIfSame(Commit branchCommit,
                                              Set<String> changeFileSetOfBranch,
                                              Set<String> changeFileSetOfCurBranch,
@@ -405,7 +414,7 @@ public class CommitTree {
             if (branchVersion.equals(masterVersion)) {
                 return;
             } else if (masterVersion != null){
-                System.out.println("Encountered a merge conflict.");
+                System.out.print("Encountered a merge conflict.");
                 twoChangeButDiff(branchCommit, file, curVersion);
                 return;
             }
@@ -435,14 +444,16 @@ public class CommitTree {
 //
 //    }
 
-    private static void OneNotExistOneKeep(Set<String> notExistFiles,
+    private static void OneNotExistOneKeep(Set<String> splitPointSet,
+                                           Set<String> notExistFiles,
                                            Set<String> noChangeFiles,
                                            HashMap<String, String> curVersion) {
-        if (noChangeFiles == null) {
+        Set<String> copy = new HashSet<>(splitPointSet);
+        copy.retainAll(notExistFiles);
+        copy.retainAll(noChangeFiles);
+        if (copy == null) {
             return;
         }
-        Set<String> copy = new HashSet<>(notExistFiles);
-        copy.removeAll(noChangeFiles);
         for (String file : copy) {
             curVersion.remove(file);
             File cwdFile =  Utils.join(Repository.CWD, file);
