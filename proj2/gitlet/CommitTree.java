@@ -338,6 +338,8 @@ public class CommitTree {
         // get splitPoint
         Commit splitPoint = findSplitPoint(masterAncestors, branchAncestors);
         HashMap<String, String> curVersion = HEAD.getVersion();
+        // specialSituation check
+        specialSituation(splitPoint, branchCommit, branch);
         // get changSet
         Set<String> changeFileSetOfBranch = getChangeSet(branchCommit, splitPoint);
         Set<String> noChangeFileSetOfBranch = opposeSet(changeFileSetOfBranch, branchCommit);
@@ -348,14 +350,12 @@ public class CommitTree {
         Set<String> noExistFileSetOfBranch = opposeSet(existFileSetOfBranch, branchCommit);
         Set<String> existFileSetOfCurBranch = getCompareFile(HEAD, splitPoint, DELETE);
         Set<String> noExistFileSetOfCurBranch = opposeSet(existFileSetOfCurBranch, HEAD);
-        // specialSituation check
-        specialSituation(splitPoint, branchCommit, branch);
         // normal situation
         branchChangeHeadKeep(branchCommit, noChangeFileSetOfCurBranch, changeFileSetOfBranch, curVersion);
         branchExistOthersNot(branchCommit, existFileSetOfBranch, existFileSetOfCurBranch, curVersion);
         OneNotExistOneKeep(noExistFileSetOfCurBranch, noChangeFileSetOfBranch, curVersion);
         OneNotExistOneKeep(noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
-        checkTwoChangeIfSame(branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch);
+        checkTwoChangeIfSame(branchCommit, changeFileSetOfBranch, curVersion);
 //        twoChangeButSame(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch, curVersion);
 //        twoChangeButDiff(splitPoint, branchCommit, changeFileSetOfBranch, changeFileSetOfCurBranch, curVersion);
         String message = "Merged " + branch + " into " + curBranchName + ".";
@@ -397,22 +397,34 @@ public class CommitTree {
 
     private static void checkTwoChangeIfSame(Commit branchCommit,
                                              Set<String> changeFileSetOfBranch,
-                                             Set<String> changeFileSetOfCurBranch) {
+                                             HashMap<String, String> curVersion) {
         for (String file : changeFileSetOfBranch) {
             String branchVersion =  branchCommit.getFlieVersion(file);
             String masterVersion = HEAD.getFlieVersion(file);
             if (branchVersion.equals(masterVersion)) {
-                //twoChangeButSame();
                 return;
-            } else {
-                //twoChangeButDiff();
+            } else if (masterVersion != null){
+                System.out.println("Encountered a merge conflict.");
+                twoChangeButDiff(branchCommit, file, curVersion);
                 return;
             }
         }
     }
 
-    private static void twoChangeButDiff(Commit splitPoint, Commit branchCommit, Set<String> changeFileSetOfBranch, Set<String> changeFileSetOfCurBranch, HashMap<String, String> curVersion) {
-        return;
+    private static void twoChangeButDiff(Commit branchCommit,String fileName, HashMap<String, String> curVersion) {
+        String curFileContentId = HEAD.getFlieVersion(fileName);
+        String curFileContent = Utils.readContentsAsString(StagingArea.getFile(curFileContentId));
+        String branchFileContentId = branchCommit.getFlieVersion(fileName);
+        String branchFileContent = Utils.readContentsAsString(StagingArea.getFile(branchFileContentId));
+        String newContent = "<<<<<<< HEAD\n" +
+                curFileContent + "\n" +
+                "=======\n" +
+                 branchFileContent + "\n" +
+                ">>>>>>>";
+        File newFile = Utils.join(Repository.CWD,fileName);
+        Utils.writeContents(newFile, newContent);
+        Blobs newBlobs = new Blobs(fileName, newFile);
+        curVersion.put(fileName, newBlobs.getSha1ID());
     }
 
 //    private static void twoChangeButSame(Commit splitPoint, Commit branchCommit, Set<String> changeFileSetOfBranch, Set<String> changeFileSetOfCurBranch, HashMap<String, String> curVersion) {
