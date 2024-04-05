@@ -350,13 +350,13 @@ public class CommitTree {
         Set<String> existFileSetOfBranch = getCompareFile(branchCommit, splitPoint, DELETE);
         Set<String> noExistFileSetOfBranch = noExistSet(splitSet, HEAD.getVersion().keySet(), branchCommit.getVersion().keySet());
         Set<String> existFileSetOfCurBranch = getCompareFile(HEAD, splitPoint, DELETE);
-        //Set<String> noExistFileSetOfCurBranch = noExistSet(splitPoint.getVersion().keySet(), branchCommit.getVersion().keySet(), HEAD.getVersion().keySet());
+        Set<String> noExistFileSetOfCurBranch = noExistSet(splitSet, branchCommit.getVersion().keySet(), HEAD.getVersion().keySet());
         // normal situation
         branchChangeHeadKeep(branchCommit, noChangeFileSetOfCurBranch, changeFileSetOfBranch, curVersion);
         branchExistOthersNot(branchCommit, existFileSetOfBranch, existFileSetOfCurBranch, curVersion);
         OneNotExistOneKeep(splitSet, noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
 //        OneNotExistOneKeep(noExistFileSetOfCurBranch, noChangeFileSetOfCurBranch, curVersion);
-        checkTwoChangeIfSame(branchCommit, changeFileSetOfBranch,changeFileSetOfCurBranch ,curVersion);
+        checkTwoChangeIfSame(branchCommit, splitSet, changeFileSetOfBranch, noExistFileSetOfBranch, changeFileSetOfCurBranch, noExistFileSetOfBranch,curVersion);
         String message = "Merged " + branch + " into " + curBranchName + ".";
         creatMergeCommmit(message, curVersion, branchCommit.getShaName(), HEAD.getShaName());
     }
@@ -403,17 +403,27 @@ public class CommitTree {
     }
 
     private static void checkTwoChangeIfSame(Commit branchCommit,
+                                             Set<String> splitSet,
                                              Set<String> changeFileSetOfBranch,
+                                             Set<String> noExistFileSetOfBranch,
                                              Set<String> changeFileSetOfCurBranch,
+                                             Set<String> noExistFileSetOfCurBranch,
                                              HashMap<String, String> curVersion) {
+        Set<String> anyChangeOfBranch = new HashSet<>(changeFileSetOfCurBranch);
+        anyChangeOfBranch.addAll(noExistFileSetOfCurBranch);
+        anyChangeOfBranch.retainAll(splitSet);
         Set<String> copy = new HashSet<>(changeFileSetOfBranch);
-        copy.retainAll(changeFileSetOfCurBranch);
+        copy.addAll(noExistFileSetOfBranch);
+        copy.retainAll(splitSet);
+        copy.addAll(anyChangeOfBranch);
         for (String file : copy) {
             String branchVersion =  branchCommit.getFlieVersion(file);
             String masterVersion = HEAD.getFlieVersion(file);
-            if (branchVersion.equals(masterVersion)) {
+            if (branchVersion != null && branchVersion.equals(masterVersion)) {
                 return;
-            } else if (masterVersion != null){
+            } else if (masterVersion != null && masterVersion.equals(branchVersion)) {
+                return;
+            } else {
                 System.out.print("Encountered a merge conflict.");
                 twoChangeButDiff(branchCommit, file, curVersion);
                 return;
@@ -423,17 +433,18 @@ public class CommitTree {
 
     private static void twoChangeButDiff(Commit branchCommit,String fileName, HashMap<String, String> curVersion) {
         String curFileContentId = HEAD.getFlieVersion(fileName);
-        String curFileContent = Utils.readContentsAsString(StagingArea.getFile(curFileContentId));
+        String curFileContent = curFileContentId != null ? new String(StagingArea.fromFile(curFileContentId).getaByte()) : "";
         String branchFileContentId = branchCommit.getFlieVersion(fileName);
-        String branchFileContent = Utils.readContentsAsString(StagingArea.getFile(branchFileContentId));
+        String branchFileContent = branchFileContentId != null ? new String(StagingArea.fromFile(branchFileContentId).getaByte()) : "";
         String newContent = "<<<<<<< HEAD\n" +
-                curFileContent + "\n" +
+                curFileContent +
                 "=======\n" +
-                 branchFileContent + "\n" +
-                ">>>>>>>";
+                 branchFileContent +
+                ">>>>>>>\n";
         File newFile = Utils.join(Repository.CWD,fileName);
         Utils.writeContents(newFile, newContent);
         Blobs newBlobs = new Blobs(fileName, newFile);
+        StagingArea.saveBlobs(newBlobs);
         curVersion.put(fileName, newBlobs.getSha1ID());
     }
 

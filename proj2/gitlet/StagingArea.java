@@ -127,7 +127,7 @@ public class StagingArea {
         return Utils.join(indexFold, blobSha2, fileName);
     }
 
-    private static void saveBlobs(Blobs blob) {
+    public static void saveBlobs(Blobs blob) {
         String blobSha = blob.getSha1ID();
         Repository.storeInObjectFile(blobSha, blob);
     }
