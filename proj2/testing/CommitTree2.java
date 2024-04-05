@@ -3,7 +3,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
-public class CommitTree {
+public class CommitTree2 {
     static final String OVER = "over";
     static final String WRITE = "writer";
     static final String DELETE = "delete";
@@ -355,11 +355,10 @@ public class CommitTree {
         branchChangeHeadKeep(branchCommit, noChangeFileSetOfCurBranch, changeFileSetOfBranch, curVersion);
         branchExistOthersNot(branchCommit, existFileSetOfBranch, existFileSetOfCurBranch, curVersion);
         OneNotExistOneKeep(splitSet, noExistFileSetOfBranch, noChangeFileSetOfCurBranch, curVersion);
-//        OneNotExistOneKeep(noExistFileSetOfCurBranch, noChangeFileSetOfCurBranch, curVersion);
+//        OneNotExistOneKeep(splitSet, noExistFileSetOfCurBranch, noChangeFileSetOfBranch, curVersion);
         checkTwoChangeIfSame(branchCommit, splitSet, changeFileSetOfBranch, noExistFileSetOfBranch, changeFileSetOfCurBranch, noExistFileSetOfCurBranch,curVersion);
         String message = "Merged " + branch + " into " + curBranchName + ".";
-        creatMergeCommmit(message, curVersion, branchCommit.getShaName(), HEAD.getShaName());
-        // a amazing bug, if this two String change their place will result err.
+        //creatMergeCommmit(message, curVersion, HEAD.getShaName(), branchCommit.getShaName());
     }
 
     private static void creatMergeCommmit(String message, HashMap<String, String> curVersion, String shaName, String shaName1) {
