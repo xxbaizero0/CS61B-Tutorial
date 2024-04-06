@@ -566,12 +566,22 @@ public class CommitTree {
     }
 
     private static void findAncestors(Commit commit, HashMap<String, Integer> branches, Integer dis) {
-        if (commit.getParent(0) == null) {
-            branches.put(commit.getShaName(), dis);
-            return;
+        Queue<Commit> queue = new LinkedList<>();
+        queue.offer(commit);
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            for (int i = 0; i < size; i++) {
+                Commit currentCommit = queue.poll();
+                branches.put(currentCommit.getShaName(), dis);
+
+                for (int j = 0; j < currentCommit.getParentCount(); j++) {
+                    Commit parentCommit = fromFile(currentCommit.getParent(j));
+                    if (parentCommit != null) {
+                        queue.offer(parentCommit);
+                    }
+                }
+            }
+            dis++;
         }
-        branches.put(commit.getShaName(), dis);
-        Commit parentCommit = fromFile(commit.getParent(0));
-        findAncestors(parentCommit, branches, dis + 1);
     }
 }

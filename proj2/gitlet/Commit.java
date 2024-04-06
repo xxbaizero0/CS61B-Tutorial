@@ -153,6 +153,13 @@ public class Commit implements Serializable {
         return parentID.get(n);
     }
 
+    public int getParentCount() {
+        if (parentID == null) {
+            return 0;
+        }
+        return parentID.size();
+    }
+
     public void setParentID(List<String> parentID) {
         this.parentID = parentID;
     }
